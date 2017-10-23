@@ -14,7 +14,7 @@ import (
 const (
 	BUFFSIZE = 1024 * 2
 	READBUFFERSIZE = 1024 *3
-	TIMEOUT = 5 * time.Second
+	TIMEOUT = 10 * time.Second
 )
 type Service struct {
 	ListenAddr *net.TCPAddr
@@ -37,12 +37,12 @@ func (s *Service) Decode(conn *net.TCPConn, src []byte) (n int, err error) {
 		source = append(source[:length], readAgain...)
 		length += l
 	}
-	fmt.Printf("read from socket %d\n", length)
+	//fmt.Printf("read from socket %d\n", length)
 	// Parse http packet
 	encrypted := http.ParseHttp(source)
-	fmt.Printf("被填充了 %d \n", len(source) - len(encrypted) - 227)
+	//fmt.Printf("被填充了 %d \n", len(source) - len(encrypted) - 227)
 	n = len(encrypted)
-	fmt.Printf("read %d, content %d \n", length, n)
+	//fmt.Printf("read %d, content %d \n", length, n)
 	iv := []byte(s.Cipher.Password)[:aes.BlockSize]
 	(*s.Cipher).AesDecrypt(src[:n], encrypted, iv)
 	return
@@ -58,7 +58,7 @@ func (s *Service) Encode(conn *net.TCPConn, src []byte) (n int, err error) {
 	httpMsg := http.NewHttp(encrypted)
 	if (len(httpMsg) < READBUFFERSIZE) {
 		padding := make([]byte, READBUFFERSIZE - len(httpMsg))
-		fmt.Printf("填充了 %d\n", READBUFFERSIZE - len(httpMsg))
+		//fmt.Printf("填充了 %d\n", READBUFFERSIZE - len(httpMsg))
 		for i, _ := range padding {
 			padding[i] = 0x00
 		}
@@ -82,8 +82,9 @@ func (s *Service) EncodeCopy(dst *net.TCPConn, src *net.TCPConn) error {
 			}
 		}
 		if readCount > 0 {
-			writeCount, errWrite := s.Encode(dst, buf[0:readCount])
-			fmt.Printf("write %d, content %d \n", writeCount, readCount)
+			//writeCount, errWrite := s.Encode(dst, buf[0:readCount])
+			_, errWrite := s.Encode(dst, buf[0:readCount])
+			//fmt.Printf("write %d, content %d \n", writeCount, readCount)
 			if errWrite != nil {
 				return errWrite
 			}

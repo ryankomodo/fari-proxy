@@ -3,7 +3,6 @@ package http
 import (
 	"bytes"
 	"strconv"
-	"fmt"
 )
 
 var body = "GET /blog.html HTTP/1.1\r\n" +
@@ -22,10 +21,7 @@ func NewHttp(ciphertext []byte) []byte {
 
 func ParseHttp(msg []byte) []byte{
 	header := bytes.Split(msg, []byte("\r\n"))
-	fmt.Printf("%d\r\n", len(header))
-	if (len(header) != 10) {
-		fmt.Printf("error?")
-	}
+	//fmt.Printf("%d\r\n", len(header))
 	lengthName := bytes.Split(header[7], []byte(":"))[0]
 	length := bytes.Split(header[7], []byte(":"))[1]
 	if string(lengthName) == "Content-Length" {
