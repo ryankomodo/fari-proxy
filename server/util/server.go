@@ -93,12 +93,12 @@ func (s *server) handle(conn *net.TCPConn) {
 	log.Printf("Connect to destination addr %s", dstAddr.String())
 	//  Read data from the peer-end to destination server
 	go func() {
-		err := s.DecodeCopy(dstServer, conn)
+		err := s.DecodeTransfer(dstServer, conn)
 		if err != nil {
 			conn.Close()
 			dstServer.Close()
 		}
 	}()
 	//	Read data from destination server to the peer-end
-	s.EncodeCopy(conn, dstServer)
+	s.EncodeTransfer(conn, dstServer)
 }

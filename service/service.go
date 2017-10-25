@@ -69,7 +69,7 @@ func (s *Service) Encode(conn *net.TCPConn, src []byte) (n int, err error) {
 }
 
 //	Read data from destination server or source server to the peer-end
-func (s *Service) EncodeCopy(dst *net.TCPConn, src *net.TCPConn) error {
+func (s *Service) EncodeTransfer(dst *net.TCPConn, src *net.TCPConn) error {
 	buf := make([]byte, BUFFSIZE)
 	for {
 		src.SetReadDeadline(time.Now().Add(TIMEOUT))
@@ -93,7 +93,7 @@ func (s *Service) EncodeCopy(dst *net.TCPConn, src *net.TCPConn) error {
 }
 
 //	Read data from the the peer-end to destination server or source server
-func (s *Service) DecodeCopy(dst *net.TCPConn, src *net.TCPConn) error {
+func (s *Service) DecodeTransfer(dst *net.TCPConn, src *net.TCPConn) error {
 	buf := make([]byte, READBUFFERSIZE)
 	for {
 		readCount, errRead := s.Decode(src, buf)
