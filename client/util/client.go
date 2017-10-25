@@ -32,7 +32,7 @@ func (c *client) Listen() error {
 	log.Printf("启动成功,监听在 %s:%d, 密码: %s", c.ListenAddr.IP, c.ListenAddr.Port, c.Cipher.Password)
 	defer listener.Close()
 
-	for i := 0; i < 100; i++{
+	for {
 		userConn, err := listener.AcceptTCP()
 		if err != nil {
 			log.Println(err)
