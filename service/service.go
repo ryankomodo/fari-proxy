@@ -14,7 +14,7 @@ import (
 const (
 	BUFFSIZE = 1024 * 2
 	READBUFFERSIZE = 1024 *3
-	TIMEOUT = 10 * time.Second
+	TIMEOUT = 3 * time.Second
 )
 type Service struct {
 	ListenAddr *net.TCPAddr
@@ -27,15 +27,16 @@ func (s *Service) Decode(conn *net.TCPConn, src []byte) (n int, err error) {
 	conn.SetDeadline(time.Now().Add(TIMEOUT))
 
 	source := make([]byte, READBUFFERSIZE)
-	length, err := conn.Read(source)
+	nread, err := conn.Read(source)
 	if err != nil {
 		return
 	}
-	for length != READBUFFERSIZE {
-		readAgain := make([]byte, READBUFFERSIZE - length)
-		l, _ := conn.Read(readAgain)
-		source = append(source[:length], readAgain...)
-		length += l
+	for nread != READBUFFERSIZE {
+		length, _ := conn.Read(source[nread:])
+		if err != nil {
+			return
+		}
+		nread += length
 	}
 	//fmt.Printf("read from socket %d\n", length)
 	// Parse http packet
