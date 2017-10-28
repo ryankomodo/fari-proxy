@@ -1,0 +1,19 @@
+# .goreleaser.yml
+# Build customization
+builds:
+  - binary: fari-client
+    main: ./client/main.go
+    goos:
+      - windows
+      - darwin
+      - linux
+    goarch:
+      - amd64
+  - binary: fari-server
+    main: ./server/main.go
+    goos:
+      - windows
+      - darwin
+      - linux
+    goarch:
+      - amd64
