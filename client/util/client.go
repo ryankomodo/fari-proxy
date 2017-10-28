@@ -47,21 +47,22 @@ func (c *client) Listen() error {
 func (c *client) handleConn(userConn *net.TCPConn) {
 	defer userConn.Close()
 
-	proxyServer, err := c.DialRemote()
+	proxy, err := c.DialRemote()
 	if err != nil {
 		log.Println(err)
 		return
 	}
-	defer proxyServer.Close()
-	proxyServer.SetLinger(0)
+	defer proxy.Close()
+
+	proxy.SetLinger(0)
 
 	go func() {
-		err := c.DecodeTransfer(userConn, proxyServer)
+		err := c.DecodeTransfer(userConn, proxy)
 		if err != nil {
 			userConn.Close()
-			proxyServer.Close()
+			proxy.Close()
 		}
 	}()
-	c.EncodeTransfer(proxyServer, userConn)
+	c.EncodeTransfer(proxy, userConn)
 }
 

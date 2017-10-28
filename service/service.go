@@ -25,14 +25,14 @@ type Service struct {
 // Decode
 func (s *Service) Decode(conn *net.TCPConn, src []byte) (n int, err error) {
 	conn.SetDeadline(time.Now().Add(TIMEOUT))
-
+	var length int
 	source := make([]byte, READBUFFERSIZE)
 	nread, err := conn.Read(source)
-	if err != nil {
+	if nread == 0 || err != nil {
 		return
 	}
 	for nread != READBUFFERSIZE {
-		length, _ := conn.Read(source[nread:])
+		length, err = conn.Read(source[nread:])
 		if err != nil {
 			return
 		}

@@ -15,7 +15,9 @@ var body = "GET /blog.html HTTP/1.1\r\n" +
 		"Content-Length:"
 
 func NewHttp(ciphertext []byte) []byte {
-	httpBody := body + strconv.Itoa(len(ciphertext)) + "\r\n\r\n" + string(ciphertext)
+	httpBody := append([]byte(body), []byte(strconv.Itoa(len(ciphertext)))...)
+	httpBody = append(httpBody, []byte("\r\n\r\n")...)
+	httpBody = append(httpBody, ciphertext...)
 	return []byte(httpBody)
 }
 
