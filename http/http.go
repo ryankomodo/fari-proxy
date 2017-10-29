@@ -5,20 +5,24 @@ import (
 	"strconv"
 )
 
-var body = "GET /blog.html HTTP/1.1\r\n" +
+var httpBody = []byte("GET /blog.html HTTP/1.1\r\n" +
 	"Accept:image/gif.image/jpeg,*/*\r\n" +
 	"Accept-Language:zh-cn\r\n" +
 	"Connection:Keep-Alive\r\n" +
 	"Host:localhost\r\n" +
 	"User-Agent:Mozila/4.0(compatible;MSIE5.01;Window NT5.0)\r\n" +
 	"Accept-Encoding:gzip,deflate\r\n" +
-	"Content-Length:"
+	"Content-Length:")
+
+var bodyLength = len(httpBody)
+var ctrf []byte = []byte("\r\n\r\n")
+var ctrfLength = len(ctrf)
 
 func NewHttp(ciphertext []byte) []byte {
-	httpBody := append([]byte(body), []byte(strconv.Itoa(len(ciphertext)))...)
-	httpBody = append(httpBody, []byte("\r\n\r\n")...)
+	httpBody := append(httpBody, []byte(strconv.Itoa(len(ciphertext)))...)
+	httpBody = append(httpBody, ctrf...)
 	httpBody = append(httpBody, ciphertext...)
-	return []byte(httpBody)
+	return httpBody
 }
 
 func ParseHttp(msg []byte) []byte {
@@ -28,7 +32,8 @@ func ParseHttp(msg []byte) []byte {
 	length := bytes.Split(header[7], []byte(":"))[1]
 	if string(lengthName) == "Content-Length" {
 		contentLength, _ := strconv.Atoi(string(length))
-		return msg[222+len(length)+4 : 222+len(length)+4+contentLength]
+		return msg[bodyLength+len(length)+ctrfLength : bodyLength+len(length)+ctrfLength+contentLength]
 	}
+	// TODO check more
 	return msg
 }
