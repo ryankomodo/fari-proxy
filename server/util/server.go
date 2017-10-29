@@ -35,7 +35,7 @@ func (s *server) Listen() {
 	for {
 		conn, err := listen.AcceptTCP()
 		if err != nil {
-			log.Fatal("%s", err)
+			log.Fatalf("%s", err.Error())
 			continue
 		}
 		conn.SetLinger(0)

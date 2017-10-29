@@ -16,11 +16,11 @@ func main() {
 
 	bytes, err := ioutil.ReadFile(conf)
 	if err != nil {
-		log.Fatal("read %s failed.", conf)
+		log.Fatalf("read %s failed.", conf)
 	}
 
 	if err := json.Unmarshal(bytes, &config); err != nil {
-		log.Fatal("parse %s failed.", conf)
+		log.Fatalf("parse %s failed.", conf)
 	}
 	server := server.NewServer(config["listen_addr"], config["password"])
 	server.Listen()
