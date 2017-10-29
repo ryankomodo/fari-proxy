@@ -1,14 +1,14 @@
 package main
 
 import (
-	"github.com/fari-proxy/client/util"
 	"encoding/json"
 	"flag"
+	"github.com/fari-proxy/client/util"
 	"io/ioutil"
 	"log"
 )
 
-func main () {
+func main() {
 	var conf string
 	var config map[string]string
 	flag.StringVar(&conf, "c", ".client.json", "client config")

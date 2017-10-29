@@ -1,5 +1,7 @@
 # fari-proxy
 
+[![Build Status](https://travis-ci.org/Leviathan1995/fari-proxy.svg?branch=master)](https://travis-ci.org/Leviathan1995/fari-proxy)
+
 一个自由上网的代理工具, 将传输的数据加密包裹在HTTP报文, 伪装成简单的明文HTTP流量, 规避其他代理因为加密特征可能被嗅探的风险。
 
 ## 特点:

@@ -1,11 +1,11 @@
 package server
 
 import (
-	"github.com/fari-proxy/service"
-	"github.com/fari-proxy/encryption"
-	"net"
-	"log"
 	"encoding/binary"
+	"github.com/fari-proxy/encryption"
+	"github.com/fari-proxy/service"
+	"log"
+	"net"
 )
 
 type server struct {
@@ -16,9 +16,9 @@ func NewServer(addr, password string) *server {
 	tcpAddr, _ := net.ResolveTCPAddr("tcp", addr)
 	c := encryption.NewCipher([]byte(password))
 	return &server{
-		&service.Service {
-			Cipher:	c,
-			ListenAddr:	tcpAddr,
+		&service.Service{
+			Cipher:     c,
+			ListenAddr: tcpAddr,
 		},
 	}
 }
@@ -33,7 +33,7 @@ func (s *server) Listen() {
 	defer listen.Close()
 
 	for {
-		conn , err := listen.AcceptTCP()
+		conn, err := listen.AcceptTCP()
 		if err != nil {
 			log.Fatal("%s", err)
 			continue
@@ -63,7 +63,7 @@ func (s *server) handle(conn *net.TCPConn) {
 	var desIP []byte
 	switch buf[3] {
 	case 0x01:
-		desIP = buf[4:4+net.IPv4len]
+		desIP = buf[4 : 4+net.IPv4len]
 	case 0x03:
 		ipAddr, err := net.ResolveIPAddr("ip", string(buf[5:n-2]))
 		if err != nil {
@@ -71,11 +71,11 @@ func (s *server) handle(conn *net.TCPConn) {
 		}
 		desIP = ipAddr.IP
 	case 0x04:
-		desIP = buf[4:4+net.IPv6len]
+		desIP = buf[4 : 4+net.IPv6len]
 	default:
 		return
 	}
-	dPort := buf[n-2:n]
+	dPort := buf[n-2 : n]
 	dstAddr := &net.TCPAddr{
 		IP:   desIP,
 		Port: int(binary.BigEndian.Uint16(dPort)),

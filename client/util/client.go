@@ -1,10 +1,10 @@
 package client
 
 import (
-	"github.com/fari-proxy/service"
 	"github.com/fari-proxy/encryption"
-	"net"
+	"github.com/fari-proxy/service"
 	"log"
+	"net"
 )
 
 type client struct {
@@ -17,8 +17,8 @@ func NewClient(remote, listen, password string) *client {
 	remoteAddr, _ := net.ResolveTCPAddr("tcp", remote)
 	return &client{
 		&service.Service{
-			Cipher:	c,
-			ListenAddr:	listenAddr,
+			Cipher:     c,
+			ListenAddr: listenAddr,
 			RemoteAddr: remoteAddr,
 		},
 	}
@@ -65,4 +65,3 @@ func (c *client) handleConn(userConn *net.TCPConn) {
 	}()
 	c.EncodeTransfer(proxy, userConn)
 }
-

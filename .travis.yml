@@ -1,0 +1,10 @@
+language: go
+go_import_path: github.com/fari-proxy
+sudo: false
+go:
+  - 1.9
+os:
+  - osx
+script:
+  - go build client/main.go
+  - go build server/server.go

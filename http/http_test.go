@@ -1,13 +1,13 @@
 package http
 
 import (
-	"testing"
-	"net"
-	"time"
 	"bufio"
 	"fmt"
 	"log"
+	"net"
 	"net/http"
+	"testing"
+	"time"
 )
 
 var serverAddr = "127.0.0.1:20010"
@@ -15,7 +15,7 @@ var ciphertext = "uzon57jd0v869t7w"
 
 func handle(w http.ResponseWriter, r *http.Request) {
 	r.ParseForm()
-	if  ciphertext != r.Header.Get("Authorization") {
+	if ciphertext != r.Header.Get("Authorization") {
 		log.Printf("ciphertext:%s - Authorization: %s", ciphertext, r.Header.Get("Authorization"))
 	} else {
 		log.Printf("match")
@@ -35,10 +35,9 @@ func httpClient(plaintext string) {
 	httpBody := NewHttp([]byte(plaintext))
 	tcpAddr, _ := net.ResolveTCPAddr("tcp", serverAddr)
 
-	conn, _:= net.DialTCP("tcp", nil, tcpAddr)
+	conn, _ := net.DialTCP("tcp", nil, tcpAddr)
 
 	conn.SetDeadline(time.Now().Add(1 * time.Minute))
-
 
 	conn.Write([]byte(httpBody))
 

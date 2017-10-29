@@ -1,25 +1,26 @@
 package service
 
 import (
-	"github.com/fari-proxy/encryption"
-	"github.com/fari-proxy/http"
-	"net"
-	"time"
 	"crypto/aes"
-	"io"
 	"errors"
 	"fmt"
+	"github.com/fari-proxy/encryption"
+	"github.com/fari-proxy/http"
+	"io"
+	"net"
+	"time"
 )
 
 const (
-	BUFFSIZE = 1024 * 2
-	READBUFFERSIZE = 1024 *3
-	TIMEOUT = 3 * time.Second
+	BUFFSIZE       = 1024 * 2
+	READBUFFERSIZE = 1024 * 3
+	TIMEOUT        = 3 * time.Second
 )
+
 type Service struct {
 	ListenAddr *net.TCPAddr
 	RemoteAddr *net.TCPAddr
-	Cipher *encryption.Cipher
+	Cipher     *encryption.Cipher
 }
 
 // Decode
@@ -57,10 +58,10 @@ func (s *Service) Encode(conn *net.TCPConn, src []byte) (n int, err error) {
 	conn.SetWriteDeadline(time.Now().Add(TIMEOUT))
 	// Wrap http packet
 	httpMsg := http.NewHttp(encrypted)
-	if (len(httpMsg) < READBUFFERSIZE) {
-		padding := make([]byte, READBUFFERSIZE - len(httpMsg))
+	if len(httpMsg) < READBUFFERSIZE {
+		padding := make([]byte, READBUFFERSIZE-len(httpMsg))
 		//fmt.Printf("填充了 %d\n", READBUFFERSIZE - len(httpMsg))
-		for i, _ := range padding {
+		for i := range padding {
 			padding[i] = 0x00
 		}
 		httpMsg = append(httpMsg, padding...)

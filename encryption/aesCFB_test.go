@@ -1,15 +1,15 @@
 package encryption
 
 import (
-	"testing"
 	"crypto/aes"
+	"testing"
 )
 
 var key = "1234567890123456"
 var src = "wqfhiqhnfihqwiufhiquwhfanfajonfowiuewfniuwenfenwfewiufneiuwfniwenfinweifniewnfinweifneiwnfiwenfinweif" +
-		"fioqjwiofjioqwjfioqwjfiojqiowfnqwifnoqwnfonqwiofnoqwinfioqwnfioqwnfioqnwfionqfqwfqwfqwfqwfqwfqwfqwfqwfq" +
-		"fwqfqwfqwfqwfqfnfiquwnfiqunfnqwijufniquwnfqwfqwijufniqnwfiqwnfijqwnfijqwnfiqnwfijqnwfinqwjfnqijwfqiwnfi" +
-		"fioqjnfiojqwfiojqfiowjioqwjfiojqwfiojqwiofjioqwfjioqjwfiojqiowfjioqwjfioqjwfiojqwiofjioqwjfioqwjfiojqwi"
+	"fioqjwiofjioqwjfioqwjfiojqiowfnqwifnoqwnfonqwiofnoqwinfioqwnfioqwnfioqnwfionqfqwfqwfqwfqwfqwfqwfqwfqwfq" +
+	"fwqfqwfqwfqwfqfnfiquwnfiqunfnqwijufniquwnfqwfqwijufniqnwfiqwnfijqwnfijqwnfiqnwfijqnwfinqwjfnqijwfqiwnfi" +
+	"fioqjnfiojqwfiojqfiowjioqwjfiojqwfiojqwiofjioqwfjioqjwfiojqiowfjioqwjfioqjwfiojqwiofjioqwjfioqwjfiojqwi"
 
 func TestNewCipher(t *testing.T) {
 	c := NewCipher([]byte(key))
@@ -20,7 +20,7 @@ func TestNewCipher(t *testing.T) {
 	decrypted := make([]byte, len(encrypted))
 	c.AesDecrypt(decrypted, encrypted, iv)
 
-	if (src != string(decrypted)) {
+	if src != string(decrypted) {
 		t.Errorf("%s", "AES CFB failed.")
 	}
 }

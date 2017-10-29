@@ -1,24 +1,24 @@
 package encryption
 
 import (
-	"crypto/cipher"
 	"crypto/aes"
+	"crypto/cipher"
 	//"fmt"
 )
 
-type Cipher struct{
+type Cipher struct {
 	cipher.Block
-	Password	[]byte
+	Password []byte
 }
 
-func NewCipher (key []byte) *Cipher{
+func NewCipher(key []byte) *Cipher {
 	c, _ := aes.NewCipher(key)
 	return &Cipher{
 		c,
 		key,
 	}
 }
-func (c *Cipher) AesEncrypt(dst, src, iv[]byte) error {
+func (c *Cipher) AesEncrypt(dst, src, iv []byte) error {
 	//fmt.Printf("%v", src)
 	aesEncrypter := cipher.NewCFBEncrypter(c, iv)
 	aesEncrypter.XORKeyStream(dst, src)
