@@ -40,7 +40,10 @@
   			"listen_addr" : "127.0.0.1:20010",   远程服务器监听地址
  			 "password" : "uzon57jd0v869t7w"
 		}
-		
+
+## Tips
+   如有任何使用问题，请在Github提交issue.
+
 ## TODO
 
 * 优化代码
