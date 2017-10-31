@@ -45,21 +45,31 @@ func (s *server) Listen() {
 
 func (s *server) handle(conn *net.TCPConn) {
 	defer conn.Close()
+	/*
+		RFC 1928 - IETF
+		https://www.ietf.org/rfc/rfc1928.txt
+	*/
 
+	// Establish socks5 connection
+	// Step one: receive client request [version, nmethods, methods]
 	buf := make([]byte, 256)
 	_, err := s.Decode(conn, buf)
-	if err != nil || buf[0] != 0x05 {
+	if err != nil || (buf[0] != 0x05) {
 		return
 	}
+	// Step two: send to client 0x05,0x00 [version, method]
 	s.Encode(conn, []byte{0x05, 0x00})
-	if buf[1] != 0x01 {
-		return
-	}
-	// Get the destination server address
+
+	// Step three: get the command and destination server address
 	n, err := s.Decode(conn, buf)
-	if err != nil || n < 7 {
+	if err != nil {
 		return
 	}
+
+	if buf[1] != 0x01 { // Only support connect
+		return
+	}
+	// Parse destination addr and port
 	var desIP []byte
 	switch buf[3] {
 	case 0x01:
@@ -75,12 +85,12 @@ func (s *server) handle(conn *net.TCPConn) {
 	default:
 		return
 	}
-	dPort := buf[n-2 : n]
+	dstPort := buf[n-2 : n]
 	dstAddr := &net.TCPAddr{
 		IP:   desIP,
-		Port: int(binary.BigEndian.Uint16(dPort)),
+		Port: int(binary.BigEndian.Uint16(dstPort)),
 	}
-	// Connect to the destination server
+	// Step four: connect to the destination server and send a reply to client
 	dstServer, err := net.DialTCP("tcp", nil, dstAddr)
 	if err != nil {
 		return
