@@ -1,6 +1,6 @@
 language: go
 go_import_path: github.com/fari-proxy
-sudo: false
+sudo: true
 go:
   - 1.9
 os:
