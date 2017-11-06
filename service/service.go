@@ -8,13 +8,11 @@ import (
 	"github.com/fari-proxy/http"
 	"io"
 	"net"
-	"time"
 )
 
 const (
 	BUFFSIZE       = 1024 * 2
 	READBUFFERSIZE = 1024 * 3
-	TIMEOUT        = 3 * time.Second
 )
 
 type Service struct {
@@ -25,7 +23,6 @@ type Service struct {
 
 // Decode
 func (s *Service) Decode(conn *net.TCPConn, src []byte) (n int, err error) {
-	conn.SetDeadline(time.Now().Add(TIMEOUT))
 	var length int
 	source := make([]byte, READBUFFERSIZE)
 	nread, err := conn.Read(source)
@@ -55,7 +52,6 @@ func (s *Service) Encode(conn *net.TCPConn, src []byte) (n int, err error) {
 	iv := []byte(s.Cipher.Password)[:aes.BlockSize]
 	encrypted := make([]byte, len(src))
 	(*s.Cipher).AesEncrypt(encrypted, src, iv)
-	conn.SetWriteDeadline(time.Now().Add(TIMEOUT))
 	// Wrap http packet
 	httpMsg := http.NewHttp(encrypted)
 	if len(httpMsg) < READBUFFERSIZE {
@@ -74,7 +70,6 @@ func (s *Service) Encode(conn *net.TCPConn, src []byte) (n int, err error) {
 func (s *Service) EncodeTransfer(dst *net.TCPConn, src *net.TCPConn) error {
 	buf := make([]byte, BUFFSIZE)
 	for {
-		src.SetReadDeadline(time.Now().Add(TIMEOUT))
 		readCount, errRead := src.Read(buf)
 		if errRead != nil {
 			if errRead != io.EOF {
@@ -107,7 +102,6 @@ func (s *Service) DecodeTransfer(dst *net.TCPConn, src *net.TCPConn) error {
 			}
 		}
 		if readCount > 0 {
-			dst.SetWriteDeadline(time.Now().Add(TIMEOUT))
 			writeCount, errWrite := dst.Write(buf[0:readCount])
 			if errWrite != nil {
 				return errWrite
