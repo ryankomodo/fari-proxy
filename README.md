@@ -18,15 +18,15 @@
 请在[Release](https://github.com/Leviathan1995/fari-proxy/releases)页面下载合适的二进制可执行文件
 * #### 启动后台管理工具Supervisor
 
-      supervisord -c supervisord.conf
-        
+        supervisord -c supervisord.conf
+
 * #### 使用Supervisor在本地后台启动 `client`
 	
-		supervisorctl start fari-client
+        supervisorctl start fari-client
 	
 * #### 在自由上网的服务器使用Supervisor后台启动`server`
 	
-		supervisorctl start fari-server
+        supervisorctl start fari-server
 		
 * #### 在本地开启SOCKS5的代理, 例如浏览器的SOCKS5插件
 
@@ -47,16 +47,16 @@
 * `.client.json`
 
 		{
-  			"remote_addr" : "127.0.0.1:20010",   远程服务器监听地址
-  			"listen_addr" : "127.0.0.1:20011",   本地SOCKS5监听地址
-  			"password" : "uzon57jd0v869t7w"
+            "remote_addr" : "127.0.0.1:20010",   远程服务器监听地址
+            "listen_addr" : "127.0.0.1:20011",   本地SOCKS5监听地址
+            "password" : "uzon57jd0v869t7w"
 		}
 
 * `.server.json`
 
 		{
-  			"listen_addr" : "127.0.0.1:20010",   远程服务器监听地址
- 			 "password" : "uzon57jd0v869t7w"
+            "listen_addr" : "127.0.0.1:20010",   远程服务器监听地址
+            "password" : "uzon57jd0v869t7w"
 		}
 
 ## Tips
