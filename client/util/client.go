@@ -1,10 +1,12 @@
 package client
 
 import (
-	"github.com/fari-proxy/encryption"
-	"github.com/fari-proxy/service"
 	"log"
 	"net"
+	"time"
+
+	"github.com/fari-proxy/encryption"
+	"github.com/fari-proxy/service"
 )
 
 type client struct {
@@ -44,13 +46,51 @@ func (c *client) Listen() error {
 	return nil
 }
 
+var proxyPool = make(chan *net.TCPConn, 10)
+
+func init() {
+	go func() {
+		for range time.Tick(5 * time.Second) {
+			p := <-proxyPool // drop a idel conn
+			p.Close()
+		}
+	}()
+}
+
+func (c *client) newProxyConn() (*net.TCPConn, error) {
+	if len(proxyPool) < 10 {
+		go func() {
+			for i := 0; i < 2; i++ {
+				proxy, err := c.DialRemote()
+				if err != nil {
+					log.Println(err)
+					return
+				}
+				proxyPool <- proxy
+			}
+		}()
+	}
+
+	select {
+	case pc := <-proxyPool:
+		return pc, nil
+	case <-time.After(100 * time.Millisecond):
+		return c.DialRemote()
+	}
+
+}
+
 func (c *client) handleConn(userConn *net.TCPConn) {
 	defer userConn.Close()
 
-	proxy, err := c.DialRemote()
+	proxy, err := c.newProxyConn()
 	if err != nil {
 		log.Println(err)
-		return
+		proxy, err = c.newProxyConn()
+		if err != nil {
+			log.Println(err)
+			return
+		}
 	}
 	defer proxy.Close()
 
