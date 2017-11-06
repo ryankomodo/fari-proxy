@@ -16,14 +16,31 @@
 
 ## 使用方法:
 请在[Release](https://github.com/Leviathan1995/fari-proxy/releases)页面下载合适的二进制可执行文件
-* #### 在本地启动 `client`
+* #### 启动后台管理工具Supervisor
+
+      supervisord -c supervisord.conf
+        
+* #### 使用Supervisor在本地后台启动 `client`
 	
-		./client -c .client.json
+		supervisorctl start fari-client
 	
-* #### 在自由上网的服务器启动`server`
+* #### 在自由上网的服务器使用Supervisor后台启动`server`
 	
-		./server -c .server.json
+		supervisorctl start fari-server
+		
 * #### 在本地开启SOCKS5的代理, 例如浏览器的SOCKS5插件
+
+### 注意:
+* 没有安装supervisor请自行安装
+    
+    Debian / Ubuntu可以直接通过apt安装：
+            
+        # apt-get install supervisor
+     
+    OS X 可以使用brew安装
+    
+        # brew install supervisor
+* 启动supervisord报路径错误时, 请自行`mkdir`相关路径
 
 ## 配置文件
 
@@ -39,7 +56,7 @@
 
 		{
   			"listen_addr" : "127.0.0.1:20010",   远程服务器监听地址
- 			  "password" : "uzon57jd0v869t7w"
+ 			 "password" : "uzon57jd0v869t7w"
 		}
 
 ## Tips
