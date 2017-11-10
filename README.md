@@ -31,19 +31,20 @@
 		
 * #### 在本地开启SOCKS5的代理, 例如浏览器的SOCKS5插件
 
-### Google Chrome 可使用SwitchyOmega或者SwitchySharp等插件配合`.pac`使用
-
 ### 注意:
-* 没有安装supervisor请自行安装
+
+* ##### Google Chrome 可使用SwitchyOmega或者SwitchySharp等插件配合`.pac`使用
+
+* ##### 没有安装supervisor请自行安装
     
-    Debian / Ubuntu可以直接通过apt安装：
+    ##### Debian / Ubuntu可以直接通过apt安装：
             
         # apt-get install supervisor
      
-    OS X 可以使用brew安装
+    ##### OS X 可以使用brew安装
     
         # brew install supervisor
-* 启动supervisord报路径错误时, 请自行`mkdir`相关路径
+* ##### 启动supervisord报路径错误时, 请自行`mkdir`相关路径
 
 ## 配置文件
 
