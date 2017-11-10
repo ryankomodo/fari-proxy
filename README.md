@@ -13,6 +13,7 @@
 * 对本地网络软件而言, 仍然是使用的SOCKS5代理, 与浏览器等软件无缝兼容
 * 使用Supervisor后台运行管理
 * 提供二进制可执行文件跨平台运行
+* 添加`.pac`文件
 
 ## 使用方法:
 请在[Release](https://github.com/Leviathan1995/fari-proxy/releases)页面下载合适的二进制可执行文件
@@ -29,6 +30,8 @@
         supervisorctl start fari-server
 		
 * #### 在本地开启SOCKS5的代理, 例如浏览器的SOCKS5插件
+
+### Google Chrome 可使用SwitchyOmega或者SwitchySharp等插件配合`.pac`使用
 
 ### 注意:
 * 没有安装supervisor请自行安装
