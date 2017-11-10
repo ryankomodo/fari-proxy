@@ -22,6 +22,6 @@ func main() {
 	if err := json.Unmarshal(bytes, &config); err != nil {
 		log.Fatalf("parse %s failed.", conf)
 	}
-	server := server.NewServer(config["listen_addr"], config["password"])
-	server.Listen()
+	s := server.NewServer(config["listen_addr"], config["password"])
+	s.Listen()
 }
