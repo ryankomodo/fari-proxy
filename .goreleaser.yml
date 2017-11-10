@@ -26,3 +26,4 @@ archive:
     - .client.json
     - .server.json
     - supervisord.conf
+    - whiteiplist.pac
