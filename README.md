@@ -4,7 +4,7 @@
 [![Go Report Card](https://goreportcard.com/badge/github.com/leviathan1995/fari-proxy)](https://goreportcard.com/report/github.com/leviathan1995/fari-proxy)
 [![GitHub version](https://badge.fury.io/gh/leviathan1995%2Ffari-proxy.svg)](https://badge.fury.io/gh/leviathan1995%2Ffari-proxy)
 
-一个自由上网的代理工具, 将传输的数据加密包裹在HTTP报文, 伪装成简单的明文HTTP流量, 规避其他代理因为加密特征可能被嗅探的风险。
+一个自由上网的代理工具, 将传输的数据加密包裹在HTTP报文, 伪装成简单的明文HTTP流量, 规避其他代理因为加密特征可能被嗅探的风险, 搭配`pac`使用体验更佳.
 
 ## 特点:
 
