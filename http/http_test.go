@@ -2,7 +2,7 @@ package http
 
 import (
 	"bufio"
-	"fmt"
+	"io/ioutil"
 	"log"
 	"net"
 	"net/http"
@@ -11,16 +11,20 @@ import (
 )
 
 var serverAddr = "127.0.0.1:20010"
-var ciphertext = "uzon57jd0v869t7w"
+var plaintext = "uzon57jd0v869t7w"
 
 func handle(w http.ResponseWriter, r *http.Request) {
 	r.ParseForm()
-	if ciphertext != r.Header.Get("Authorization") {
-		log.Printf("ciphertext:%s - Authorization: %s", ciphertext, r.Header.Get("Authorization"))
+	body, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		log.Print("test failed")
 	} else {
-		log.Printf("match")
+		if string(body) == plaintext {
+			log.Print("test success")
+		} else {
+			log.Print("test failed")
+		}
 	}
-	fmt.Fprintf(w, "hello")
 }
 
 func httpServer() {
@@ -47,18 +51,6 @@ func httpClient(plaintext string) {
 }
 
 func TestNewHttp(t *testing.T) {
-	go httpClient("uzon57jd0v869t7w")
+	go httpClient(plaintext)
 	httpServer()
-}
-
-func TestParseHttp(t *testing.T) {
-	bodyLength := len(body)
-	log.Printf("http header length %d\n", bodyLength)
-	httpBody := NewHttp([]byte(ciphertext))
-	parserd := string(ParseHttp(httpBody))
-	if parserd != ciphertext {
-		t.Errorf("http parse filaed.")
-	} else {
-		log.Printf("http parse success.")
-	}
 }
