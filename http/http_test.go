@@ -12,6 +12,10 @@ import (
 
 var serverAddr = "127.0.0.1:20010"
 var plaintext = "uzon57jd0v869t7w"
+var incompleteHttpBody = []byte("GET /blog.html HTTP/1.1\r\n" +
+	"Accept:image/gif.image/jpeg,*/*\r\n" +
+	"Accept-Language:zh-cn\r\n" +
+	"Connection:Keep-Alive\r\n")
 
 func handle(w http.ResponseWriter, r *http.Request) {
 	r.ParseForm()
@@ -53,4 +57,32 @@ func httpClient(plaintext string) {
 func TestNewHttp(t *testing.T) {
 	go httpClient(plaintext)
 	httpServer()
+}
+
+func TestParseHttp(t *testing.T) {
+	// empty http request
+	msg := make([]byte, 0)
+	msg = ParseHttp(msg)
+	if len(msg) == 0 {
+		log.Print("empty http request test success")
+	} else {
+		log.Print("empty http request test failed")
+	}
+
+	// incomplete http request
+	msg = ParseHttp(incompleteHttpBody)
+	if len(msg) == 0 {
+		log.Print("incomplete http request test success")
+	} else {
+		log.Print("incomplete http request test failed")
+	}
+
+	// complete http request
+	msg = NewHttp([]byte(plaintext))
+	msg = ParseHttp(msg)
+	if string(msg) == plaintext {
+		log.Print("complete http request test success")
+	} else {
+		log.Print("complete http request test failed")
+	}
 }
