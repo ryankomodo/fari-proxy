@@ -14,7 +14,7 @@ var httpBody = []byte("GET /blog.html HTTP/1.1\r\n" +
 	"Accept-Encoding:gzip,deflate\r\n" +
 	"Content-Length:")
 
-var bodyLength = len(httpBody)
+var BodyLength = len(httpBody)
 var ctrf = []byte("\r\n\r\n")
 var ctrfLength = len(ctrf)
 
@@ -34,7 +34,7 @@ func ParseHttp(msg []byte) []byte {
 			length := bytes.Split(header[7], []byte(":"))[1]
 			if string(lengthName) == "Content-Length" {
 				contentLength, _ := strconv.Atoi(string(length))
-				return msg[bodyLength+len(length)+ctrfLength : bodyLength+len(length)+ctrfLength+contentLength]
+				return msg[BodyLength+len(length)+ctrfLength : BodyLength+len(length)+ctrfLength+contentLength]
 			}
 		}
 	}

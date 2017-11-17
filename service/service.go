@@ -10,10 +10,8 @@ import (
 	"net"
 )
 
-const (
-	BUFFSIZE       = 1024 * 2
-	READBUFFERSIZE = 1024 * 3
-)
+const BUFFSIZE     = 1024 * 2
+var READBUFFERSIZE = BUFFSIZE + http.BodyLength
 
 type Service struct {
 	ListenAddr *net.TCPAddr
