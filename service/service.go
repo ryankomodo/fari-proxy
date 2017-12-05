@@ -10,7 +10,8 @@ import (
 	"net"
 )
 
-const BUFFSIZE     = 1024 * 2
+const BUFFSIZE = 1024 * 2
+
 var READBUFFERSIZE = BUFFSIZE + http.BodyLength
 
 type Service struct {
