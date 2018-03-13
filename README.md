@@ -21,11 +21,11 @@
 
         supervisord -c supervisord.conf
 
-* #### 使用Supervisor在本地后台启动 `client`
+* #### 使用Supervisor在本地机器后台启动 `client`
 	
         supervisorctl start fari-client
 	
-* #### 在自由上网的服务器使用Supervisor后台启动`server`
+* #### 在可以自由上网的服务器(VPS)使用Supervisor后台启动`server`
 	
         supervisorctl start fari-server
 		
