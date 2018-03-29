@@ -66,6 +66,10 @@
 ## Tips
    如有任何使用问题，请在Github提交issue.
 
+## VPS推荐
+
+<a href="https://www.vultr.com/?ref=7235708"><img src="https://www.vultr.com/media/banner_2.png" width="468" height="60"></a>
+
 ## TODO
 
 * 优化代码
