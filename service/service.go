@@ -12,7 +12,7 @@ import (
 
 const BUFFSIZE = 1024 * 2
 
-var READBUFFERSIZE = BUFFSIZE + http.BodyLength
+var READBUFFERSIZE = BUFFSIZE + http.BodyLength + 8 // 8 is the lenght of http content, that is "Content-Length:"
 
 type Service struct {
 	ListenAddr *net.TCPAddr
