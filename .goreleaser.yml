@@ -27,3 +27,4 @@ archive:
     - .server.json
     - supervisord.conf
     - whiteiplist.pac
+    - start.sh
