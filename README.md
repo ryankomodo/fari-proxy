@@ -10,7 +10,7 @@
 
 * 数据包使用`aes-cfb`加密
 * 使用HTTP协议伪装数据包, 后续会支持自定义HTTP报文
-* 对本地网络软件而言, 仍然是使用的SOCKS5代理, 与浏览器等软件无缝兼容
+* 对本地网络软件而言, 仍然是使用的SOCKS5代理, 与浏览器等软件无缝兼容, 包括`git clone`加速
 * 使用Supervisor后台运行管理
 * 提供二进制可执行文件跨平台运行
 * 添加`.pac`文件
@@ -63,8 +63,14 @@
             "password" : "uzon57jd0v869t7w"
 		}
 
+## Git clone 加速
+```
+git config --global http.proxy 'socks5://127.0.0.1:20010' 
+git config --global https.proxy 'socks5://127.0.0.1:20010'
+```
+
 ## Tips
-   如有任何使用问题，请在Github提交issue.
+如有任何使用问题，请在Github提交issue.
 
 ## VPS推荐
 
