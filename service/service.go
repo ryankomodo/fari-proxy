@@ -43,13 +43,16 @@ func (s *Service) Decode(conn *net.TCPConn, src []byte) (n int, err error) {
 	return
 }
 
-//	Encode
+// Encode
 func (s *Service) Encode(conn *net.TCPConn, src []byte) (n int, err error) {
 	iv := []byte(s.Cipher.Password)[:aes.BlockSize]
 	encrypted := make([]byte, len(src))
 	(*s.Cipher).AesEncrypt(encrypted, src, iv)
+
 	// Wrap http packet
 	httpMsg := http.NewHttp(encrypted)
+
+  // If the size of packet less than the Buffer size, we need padding with 0x00
 	if len(httpMsg) < READBUFFERSIZE {
 		padding := make([]byte, READBUFFERSIZE-len(httpMsg))
 		for i := range padding {
@@ -60,7 +63,7 @@ func (s *Service) Encode(conn *net.TCPConn, src []byte) (n int, err error) {
 	return conn.Write(httpMsg)
 }
 
-//	Read data from destination server or source server to the peer-end
+// Read data from destination server or source server to the peer-end
 func (s *Service) EncodeTransfer(dst *net.TCPConn, src *net.TCPConn) error {
 	buf := make([]byte, BUFFSIZE)
 	for {
@@ -81,7 +84,7 @@ func (s *Service) EncodeTransfer(dst *net.TCPConn, src *net.TCPConn) error {
 	}
 }
 
-//	Read data from the the peer-end to destination server or source server
+// Read data from the the peer-end to destination server or source server
 func (s *Service) DecodeTransfer(dst *net.TCPConn, src *net.TCPConn) error {
 	buf := make([]byte, READBUFFERSIZE)
 	for {
