@@ -73,8 +73,7 @@ git config --global https.proxy 'socks5://127.0.0.1:20010'
 如有任何使用问题，请在Github提交issue.
 
 ## VPS推荐
-
-<a href="https://www.vultr.com/?ref=7235708"><img src="https://www.vultr.com/media/banner_2.png" width="468" height="60"></a>
+强力推荐[搬瓦工29.9年付洛杉矶节点](https://bandwagonhost.com/aff.php?aff=35559)
 
 ## TODO
 
