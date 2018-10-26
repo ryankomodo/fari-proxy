@@ -2,10 +2,11 @@ package server
 
 import (
 	"encoding/binary"
-	"github.com/fari-proxy/encryption"
-	"github.com/fari-proxy/service"
 	"log"
 	"net"
+
+	"github.com/fari-proxy/encryption"
+	"github.com/fari-proxy/service"
 )
 
 type server struct {
@@ -29,47 +30,49 @@ func (s *server) Listen() {
 		log.Println(err)
 		return
 	}
-	log.Printf("启动成功,监听在 %s:%d, 密码: %s", s.ListenAddr.IP, s.ListenAddr.Port, s.Cipher.Password)
+	log.Printf("Server启动成功,监听在 %s:%d, 密码: %s", s.ListenAddr.IP, s.ListenAddr.Port, s.Cipher.Password)
 	defer listen.Close()
 
 	for {
-		conn, err := listen.AcceptTCP()
+		userConn, err := listen.AcceptTCP()
 		if err != nil {
 			log.Fatalf("%s", err.Error())
 			continue
 		}
-		conn.SetLinger(0)
-		go s.handle(conn)
+		userConn.SetLinger(0)
+		go s.handle(userConn)
 	}
 }
 
-func (s *server) handle(conn *net.TCPConn) {
-	defer conn.Close()
+func (s *server) handle(userConn *net.TCPConn) {
+	defer userConn.Close()
 	/*
 		RFC 1928 - IETF
 		https://www.ietf.org/rfc/rfc1928.txt
 	*/
 
-	// Establish socks5 connection
-	// Step one: receive client request [version, nmethods, methods]
+	// Establishing socks5 connection
+	// Step1: receive client request [version, nmethods, methods]
 	buf := make([]byte, 256)
-	_, err := s.Decode(conn, buf)
+	_, err := s.HttpDecode(userConn, buf, service.SERVER)
 	if err != nil || (buf[0] != 0x05) {
 		return
 	}
-	// Step two: send to client 0x05,0x00 [version, method]
-	s.Encode(conn, []byte{0x05, 0x00})
 
-	// Step three: get the command and destination server address
-	n, err := s.Decode(conn, buf)
+	// Step2: send to client 0x05,0x00 [version, method]
+	s.HttpEncode(userConn, []byte{0x05, 0x00}, service.SERVER)
+
+	// Step3: get the command and destination server address
+	n, err := s.HttpDecode(userConn, buf, service.SERVER)
 	if err != nil {
 		return
 	}
 
-	if buf[1] != 0x01 { // Only support connect
+	if buf[1] != 0x01 {	// Only support connect
 		return
 	}
-	// Parse destination addr and port
+
+	// Parsing destination addr and port
 	var desIP []byte
 	switch buf[3] {
 	case 0x01:
@@ -90,25 +93,25 @@ func (s *server) handle(conn *net.TCPConn) {
 		IP:   desIP,
 		Port: int(binary.BigEndian.Uint16(dstPort)),
 	}
-	// Step four: connect to the destination server and send a reply to client
+	// Step4: connect to the destination server and send a reply to client
 	dstServer, err := net.DialTCP("tcp", nil, dstAddr)
 	if err != nil {
 		return
 	} else {
 		defer dstServer.Close()
 		dstServer.SetLinger(0)
-		s.Encode(conn, []byte{0x05, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00})
+		s.HttpEncode(userConn, []byte{0x05, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00}, service.SERVER)
 	}
 
 	log.Printf("Connect to destination addr %s", dstAddr.String())
-	// Read data from the peer-end to destination server
+
 	go func() {
-		err := s.DecodeTransfer(dstServer, conn)
+		err := s.DecodeTransfer(dstServer, userConn, service.SERVER)
 		if err != nil {
-			conn.Close()
+			userConn.Close()
 			dstServer.Close()
 		}
 	}()
-	// Read data from destination server to the peer-end
-	s.EncodeTransfer(conn, dstServer)
+
+	s.EncodeTransfer(userConn, dstServer, service.SERVER)
 }

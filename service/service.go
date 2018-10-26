@@ -4,15 +4,24 @@ import (
 	"crypto/aes"
 	"errors"
 	"fmt"
-	"github.com/fari-proxy/encryption"
-	"github.com/fari-proxy/http"
 	"io"
 	"net"
+
+	"github.com/fari-proxy/encryption"
+	"github.com/fari-proxy/http"
 )
 
 const BUFFSIZE = 1024 * 2
 
-var READBUFFERSIZE = BUFFSIZE + http.BodyLength + 8 // 8 is the lenght of http content, that is "Content-Length:"
+var REQUESTBUFFSIZE = BUFFSIZE + http.RequestLength + 8 // 8 is the lenght of http content, that is "Content-Length:"
+var RESPONSEBUFFSIZE = BUFFSIZE + http.ResponseLength + 8
+
+type Type int
+
+const (
+	SERVER = iota
+	CLIENT
+)
 
 type Service struct {
 	ListenAddr *net.TCPAddr
@@ -20,41 +29,64 @@ type Service struct {
 	Cipher     *encryption.Cipher
 }
 
-// Decode
-func (s *Service) Decode(conn *net.TCPConn, src []byte) (n int, err error) {
-	var length int
-	source := make([]byte, READBUFFERSIZE)
+
+func (s *Service) HttpDecode(conn *net.TCPConn, src []byte, cs Type) (n int, err error) {
+	var length, buf_len int
+	if cs == SERVER {
+		buf_len = REQUESTBUFFSIZE
+	} else {
+		buf_len = RESPONSEBUFFSIZE
+	}
+
+	source := make([]byte, buf_len)
 	nread, err := conn.Read(source)
 	if nread == 0 || err != nil {
-		return
+		return nread, err
 	}
-	for nread != READBUFFERSIZE {
+	for nread != buf_len {
 		length, err = conn.Read(source[nread:])
 		if err != nil {
-			return
+			if err != io.EOF {
+				return nread, err
+			}
 		}
 		nread += length
 	}
-	// Parse http packet
-	encrypted := http.ParseHttp(source)
+
+	var encrypted []byte
+	// Parsing http
+	if cs == SERVER {
+		encrypted = http.ParseHttpRequest(source)
+	} else {
+		encrypted = http.ParseHttpResponse(source)
+	}
+
 	n = len(encrypted)
 	iv := []byte(s.Cipher.Password)[:aes.BlockSize]
 	(*s.Cipher).AesDecrypt(src[:n], encrypted, iv)
-	return
+	return n, err
 }
 
-// Encode
-func (s *Service) Encode(conn *net.TCPConn, src []byte) (n int, err error) {
+
+//	Warping the http packet with data
+func (s *Service) HttpEncode(conn *net.TCPConn, src []byte, cs Type) (n int, err error) {
 	iv := []byte(s.Cipher.Password)[:aes.BlockSize]
 	encrypted := make([]byte, len(src))
 	(*s.Cipher).AesEncrypt(encrypted, src, iv)
 
-	// Wrap http packet
-	httpMsg := http.NewHttp(encrypted)
+	var httpMsg []byte
+	var buf_len int
+	if cs == SERVER {
+		httpMsg = http.NewHttpResponse(encrypted)
+		buf_len = RESPONSEBUFFSIZE
+	} else {
+		httpMsg = http.NewHttpRequest(encrypted)
+		buf_len = REQUESTBUFFSIZE
+	}
 
-  // If the size of packet less than the Buffer size, we need padding with 0x00
-	if len(httpMsg) < READBUFFERSIZE {
-		padding := make([]byte, READBUFFERSIZE-len(httpMsg))
+	//	Padding with 0x00
+	if len(httpMsg) <  buf_len{
+		padding := make([]byte, buf_len-len(httpMsg))
 		for i := range padding {
 			padding[i] = 0x00
 		}
@@ -63,9 +95,10 @@ func (s *Service) Encode(conn *net.TCPConn, src []byte) (n int, err error) {
 	return conn.Write(httpMsg)
 }
 
-// Read data from destination server or source server to the peer-end
-func (s *Service) EncodeTransfer(dst *net.TCPConn, src *net.TCPConn) error {
+
+func (s *Service) EncodeTransfer(dst *net.TCPConn, src *net.TCPConn, cs Type) error {
 	buf := make([]byte, BUFFSIZE)
+
 	for {
 		readCount, errRead := src.Read(buf)
 		if errRead != nil {
@@ -76,7 +109,7 @@ func (s *Service) EncodeTransfer(dst *net.TCPConn, src *net.TCPConn) error {
 			}
 		}
 		if readCount > 0 {
-			_, errWrite := s.Encode(dst, buf[0:readCount])
+			_, errWrite := s.HttpEncode(dst, buf[0:readCount], cs)
 			if errWrite != nil {
 				return errWrite
 			}
@@ -84,11 +117,11 @@ func (s *Service) EncodeTransfer(dst *net.TCPConn, src *net.TCPConn) error {
 	}
 }
 
-// Read data from the the peer-end to destination server or source server
-func (s *Service) DecodeTransfer(dst *net.TCPConn, src *net.TCPConn) error {
-	buf := make([]byte, READBUFFERSIZE)
+
+func (s *Service) DecodeTransfer(dst *net.TCPConn, src *net.TCPConn, cs Type) error {
+	buf := make([]byte, REQUESTBUFFSIZE)
 	for {
-		readCount, errRead := s.Decode(src, buf)
+		readCount, errRead := s.HttpDecode(src, buf, cs)
 		if errRead != nil {
 			if errRead != io.EOF {
 				return errRead
@@ -107,6 +140,7 @@ func (s *Service) DecodeTransfer(dst *net.TCPConn, src *net.TCPConn) error {
 		}
 	}
 }
+
 
 func (s *Service) DialRemote() (*net.TCPConn, error) {
 	remoteConn, err := net.DialTCP("tcp", nil, s.RemoteAddr)

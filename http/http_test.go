@@ -17,6 +17,7 @@ var incompleteHttpBody = []byte("GET /blog.html HTTP/1.1\r\n" +
 	"Accept-Language:zh-cn\r\n" +
 	"Connection:Keep-Alive\r\n")
 
+
 func handle(w http.ResponseWriter, r *http.Request) {
 	r.ParseForm()
 	body, err := ioutil.ReadAll(r.Body)
@@ -40,7 +41,7 @@ func httpServer() {
 }
 
 func httpClient(plaintext string) {
-	httpBody := NewHttp([]byte(plaintext))
+	httpBody := NewHttpRequest([]byte(plaintext))
 	tcpAddr, _ := net.ResolveTCPAddr("tcp", serverAddr)
 
 	conn, _ := net.DialTCP("tcp", nil, tcpAddr)
@@ -54,15 +55,26 @@ func httpClient(plaintext string) {
 	reader.Read(reply)
 }
 
+
+func TestGMT(t *testing.T) {
+	timestamp := GMT()
+	if "GMT" != timestamp[len(timestamp) -3:len(timestamp)] {
+		log.Print("GMT() is invalid")
+	} else {
+		log.Print("GMT() is valid")
+	}
+}
+
 func TestNewHttp(t *testing.T) {
 	go httpClient(plaintext)
 	httpServer()
 }
 
+
 func TestParseHttp(t *testing.T) {
 	// empty http request
 	msg := make([]byte, 0)
-	msg = ParseHttp(msg)
+	msg = ParseHttpRequest(msg)
 	if len(msg) == 0 {
 		log.Print("empty http request test success")
 	} else {
@@ -70,7 +82,7 @@ func TestParseHttp(t *testing.T) {
 	}
 
 	// incomplete http request
-	msg = ParseHttp(incompleteHttpBody)
+	msg = ParseHttpRequest(incompleteHttpBody)
 	if len(msg) == 0 {
 		log.Print("incomplete http request test success")
 	} else {
@@ -78,8 +90,8 @@ func TestParseHttp(t *testing.T) {
 	}
 
 	// complete http request
-	msg = NewHttp([]byte(plaintext))
-	msg = ParseHttp(msg)
+	msg = NewHttpRequest([]byte(plaintext))
+	msg = ParseHttpRequest(msg)
 	if string(msg) == plaintext {
 		log.Print("complete http request test success")
 	} else {

@@ -31,7 +31,7 @@ func (c *client) Listen() error {
 	if err != nil {
 		return err
 	}
-	log.Printf("启动成功,监听在 %s:%d, 密码: %s", c.ListenAddr.IP, c.ListenAddr.Port, c.Cipher.Password)
+	log.Printf("Client启动成功,监听在 %s:%d, 密码: %s", c.ListenAddr.IP, c.ListenAddr.Port, c.Cipher.Password)
 	defer listener.Close()
 
 	for {
@@ -40,6 +40,7 @@ func (c *client) Listen() error {
 			log.Println(err)
 			continue
 		}
+		// Discard any unsent or unacknowledged data.
 		userConn.SetLinger(0)
 		go c.handleConn(userConn)
 	}
@@ -51,7 +52,7 @@ var proxyPool = make(chan *net.TCPConn, 10)
 func init() {
 	go func() {
 		for range time.Tick(5 * time.Second) {
-			p := <-proxyPool // drop a idel conn
+			p := <-proxyPool	// Discard the idle connection
 			p.Close()
 		}
 	}()
@@ -77,7 +78,6 @@ func (c *client) newProxyConn() (*net.TCPConn, error) {
 	case <-time.After(100 * time.Millisecond):
 		return c.DialRemote()
 	}
-
 }
 
 func (c *client) handleConn(userConn *net.TCPConn) {
@@ -97,11 +97,11 @@ func (c *client) handleConn(userConn *net.TCPConn) {
 	proxy.SetLinger(0)
 
 	go func() {
-		err := c.DecodeTransfer(userConn, proxy)
+		err := c.DecodeTransfer(userConn, proxy, service.CLIENT)
 		if err != nil {
 			userConn.Close()
 			proxy.Close()
 		}
 	}()
-	c.EncodeTransfer(proxy, userConn)
+	c.EncodeTransfer(proxy, userConn, service.CLIENT)
 }

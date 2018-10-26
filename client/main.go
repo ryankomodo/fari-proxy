@@ -3,9 +3,10 @@ package main
 import (
 	"encoding/json"
 	"flag"
-	"github.com/fari-proxy/client/util"
 	"io/ioutil"
 	"log"
+
+	"github.com/fari-proxy/client/util"
 )
 
 func main() {
@@ -16,11 +17,11 @@ func main() {
 
 	bytes, err := ioutil.ReadFile(conf)
 	if err != nil {
-		log.Fatalf("read %s failed.", conf)
+		log.Fatalf("Reading %s failed.", conf)
 	}
 
 	if err := json.Unmarshal(bytes, &config); err != nil {
-		log.Fatalf("parse %s failed.", conf)
+		log.Fatalf("Parsing %s failed.", conf)
 	}
 	client := client.NewClient(config["remote_addr"], config["listen_addr"], config["password"])
 	client.Listen()

@@ -3,9 +3,10 @@ package main
 import (
 	"encoding/json"
 	"flag"
-	"github.com/fari-proxy/server/util"
 	"io/ioutil"
 	"log"
+
+	"github.com/fari-proxy/server/util"
 )
 
 func main() {

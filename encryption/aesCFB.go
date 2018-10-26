@@ -3,7 +3,6 @@ package encryption
 import (
 	"crypto/aes"
 	"crypto/cipher"
-	//"fmt"
 )
 
 type Cipher struct {
