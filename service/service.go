@@ -54,7 +54,7 @@ func (s *Service) HttpDecode(conn *net.TCPConn, src []byte, cs Type) (n int, err
 	}
 
 	var encrypted []byte
-	// Parsing http
+	// Parsing packet
 	if cs == SERVER {
 		encrypted = http.ParseHttpRequest(source)
 	} else {
@@ -97,13 +97,7 @@ func (s *Service) HttpEncode(conn *net.TCPConn, src []byte, cs Type) (n int, err
 
 
 func (s *Service) EncodeTransfer(dst *net.TCPConn, src *net.TCPConn, cs Type) error {
-	var buf_len int
-	if cs == SERVER {
-		buf_len = RESPONSEBUFFSIZE
-	} else {
-		buf_len = REQUESTBUFFSIZE
-	}
-	buf := make([]byte, buf_len)
+	buf := make([]byte, BUFFSIZE)
 
 	for {
 		readCount, errRead := src.Read(buf)
@@ -127,9 +121,9 @@ func (s *Service) EncodeTransfer(dst *net.TCPConn, src *net.TCPConn, cs Type) er
 func (s *Service) DecodeTransfer(dst *net.TCPConn, src *net.TCPConn, cs Type) error {
 	var buf_len int
 	if cs == SERVER {
-		buf_len = RESPONSEBUFFSIZE
-	} else {
 		buf_len = REQUESTBUFFSIZE
+	} else {
+		buf_len = RESPONSEBUFFSIZE
 	}
 	buf := make([]byte, buf_len)
 

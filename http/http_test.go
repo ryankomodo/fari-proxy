@@ -12,10 +12,16 @@ import (
 
 var serverAddr = "127.0.0.1:20010"
 var plaintext = "uzon57jd0v869t7w"
-var incompleteHttpBody = []byte("GET /blog.html HTTP/1.1\r\n" +
+var incompleteHttpRequest = []byte("GET /blog.html HTTP/1.1\r\n" +
 	"Accept:image/gif.image/jpeg,*/*\r\n" +
 	"Accept-Language:zh-cn\r\n" +
 	"Connection:Keep-Alive\r\n")
+
+var incompletehttpResponse = []byte("HTTP/1.1 200 OK\r\n" +
+	"Content-Type: text/html\r\n" +
+	"Date: " +  GMT() + "\r\n" +
+	"Server: Microsoft-IIS/6.0\r\n" +
+	"Content-Type: text/html\r\n")
 
 
 func handle(w http.ResponseWriter, r *http.Request) {
@@ -71,7 +77,7 @@ func TestNewHttp(t *testing.T) {
 }
 
 
-func TestParseHttp(t *testing.T) {
+func TestParseHttpRequest(t *testing.T) {
 	// empty http request
 	msg := make([]byte, 0)
 	msg = ParseHttpRequest(msg)
@@ -81,20 +87,48 @@ func TestParseHttp(t *testing.T) {
 		log.Print("empty http request test failed")
 	}
 
-	// incomplete http request
-	msg = ParseHttpRequest(incompleteHttpBody)
+	// Incomplete http request
+	msg = ParseHttpRequest(incompleteHttpRequest)
 	if len(msg) == 0 {
 		log.Print("incomplete http request test success")
 	} else {
 		log.Print("incomplete http request test failed")
 	}
 
-	// complete http request
+	// Complete http request
 	msg = NewHttpRequest([]byte(plaintext))
 	msg = ParseHttpRequest(msg)
 	if string(msg) == plaintext {
 		log.Print("complete http request test success")
 	} else {
 		log.Print("complete http request test failed")
+	}
+}
+
+func TestParseHttpResponse(t *testing.T) {
+	// Empty http response
+	msg := make([]byte, 0)
+	msg = ParseHttpResponse(msg)
+	if len(msg) == 0 {
+		log.Print("empty http response test success")
+	} else {
+		log.Print("empty http response test failed")
+	}
+
+	// Incomplete http response
+	msg = ParseHttpResponse(incompletehttpResponse)
+	if len(msg) == 0 {
+		log.Print("incomplete http response test success")
+	} else {
+		log.Print("incomplete http response test failed")
+	}
+
+	// Complete http response
+	msg = NewHttpResponse([]byte(plaintext))
+	msg = ParseHttpResponse(msg)
+	if string(msg) == plaintext {
+		log.Print("complete http response test success")
+	} else {
+		log.Print("complete http response test failed")
 	}
 }
