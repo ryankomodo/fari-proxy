@@ -97,7 +97,13 @@ func (s *Service) HttpEncode(conn *net.TCPConn, src []byte, cs Type) (n int, err
 
 
 func (s *Service) EncodeTransfer(dst *net.TCPConn, src *net.TCPConn, cs Type) error {
-	buf := make([]byte, BUFFSIZE)
+	var buf_len int
+	if cs == SERVER {
+		buf_len = RESPONSEBUFFSIZE
+	} else {
+		buf_len = REQUESTBUFFSIZE
+	}
+	buf := make([]byte, buf_len)
 
 	for {
 		readCount, errRead := src.Read(buf)
@@ -119,7 +125,14 @@ func (s *Service) EncodeTransfer(dst *net.TCPConn, src *net.TCPConn, cs Type) er
 
 
 func (s *Service) DecodeTransfer(dst *net.TCPConn, src *net.TCPConn, cs Type) error {
-	buf := make([]byte, REQUESTBUFFSIZE)
+	var buf_len int
+	if cs == SERVER {
+		buf_len = RESPONSEBUFFSIZE
+	} else {
+		buf_len = REQUESTBUFFSIZE
+	}
+	buf := make([]byte, buf_len)
+
 	for {
 		readCount, errRead := s.HttpDecode(src, buf, cs)
 		if errRead != nil {
