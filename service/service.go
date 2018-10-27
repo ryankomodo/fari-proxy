@@ -41,14 +41,12 @@ func (s *Service) HttpDecode(conn *net.TCPConn, src []byte, cs Type) (n int, err
 	source := make([]byte, buf_len)
 	nread, err := conn.Read(source)
 	if nread == 0 || err != nil {
-		return nread, err
+		return
 	}
 	for nread != buf_len {
 		length, err = conn.Read(source[nread:])
 		if err != nil {
-			if err != io.EOF {
-				return nread, err
-			}
+			return
 		}
 		nread += length
 	}
@@ -64,7 +62,7 @@ func (s *Service) HttpDecode(conn *net.TCPConn, src []byte, cs Type) (n int, err
 	n = len(encrypted)
 	iv := []byte(s.Cipher.Password)[:aes.BlockSize]
 	(*s.Cipher).AesDecrypt(src[:n], encrypted, iv)
-	return n, err
+	return
 }
 
 
