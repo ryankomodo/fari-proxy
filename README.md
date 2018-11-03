@@ -16,7 +16,7 @@
 * 添加`.pac`文件
 
 ## 使用方法:
-请在[Release](https://github.com/Leviathan1995/fari-proxy/releases)页面下载合适的二进制可执行文件
+请在[Release](https://github.com/Leviathan1995/fari-proxy/releases)页面下载最新版适配的二进制可执行文件
 * #### 启动后台管理工具Supervisor
 
         supervisord -c supervisord.conf
