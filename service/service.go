@@ -66,7 +66,7 @@ func (s *Service) HttpDecode(conn *net.TCPConn, src []byte, cs Type) (n int, err
 }
 
 
-//	Warping the http packet with data
+// Warping the http packet with data
 func (s *Service) HttpEncode(conn *net.TCPConn, src []byte, cs Type) (n int, err error) {
 	iv := []byte(s.Cipher.Password)[:aes.BlockSize]
 	encrypted := make([]byte, len(src))
@@ -82,7 +82,7 @@ func (s *Service) HttpEncode(conn *net.TCPConn, src []byte, cs Type) (n int, err
 		buf_len = REQUESTBUFFSIZE
 	}
 
-	//	Padding with 0x00
+	// Padding with 0x00
 	if len(httpMsg) <  buf_len{
 		padding := make([]byte, buf_len-len(httpMsg))
 		for i := range padding {
