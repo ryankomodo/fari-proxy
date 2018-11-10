@@ -1,16 +1,10 @@
 package http
 
 import (
-	"bufio"
-	"io/ioutil"
 	"log"
-	"net"
-	"net/http"
 	"testing"
-	"time"
 )
 
-var serverAddr = "127.0.0.1:20010"
 var plaintext = "uzon57jd0v869t7w"
 var incompleteHttpRequest = []byte("GET /blog.html HTTP/1.1\r\n" +
 	"Accept:image/gif.image/jpeg,*/*\r\n" +
@@ -23,45 +17,6 @@ var incompletehttpResponse = []byte("HTTP/1.1 200 OK\r\n" +
 	"Server: Microsoft-IIS/6.0\r\n" +
 	"Content-Type: text/html\r\n")
 
-
-func handle(w http.ResponseWriter, r *http.Request) {
-	r.ParseForm()
-	body, err := ioutil.ReadAll(r.Body)
-	if err != nil {
-		log.Print("test failed")
-	} else {
-		if string(body) == plaintext {
-			log.Print("test success")
-		} else {
-			log.Print("test failed")
-		}
-	}
-}
-
-func httpServer() {
-	http.HandleFunc("/blog.html", handle)
-	err := http.ListenAndServe(serverAddr, nil)
-	if err != nil {
-		log.Fatal("ListenAndServe: ", err)
-	}
-}
-
-func httpClient(plaintext string) {
-	httpBody := NewHttpRequest([]byte(plaintext))
-	tcpAddr, _ := net.ResolveTCPAddr("tcp", serverAddr)
-
-	conn, _ := net.DialTCP("tcp", nil, tcpAddr)
-
-	conn.SetDeadline(time.Now().Add(1 * time.Minute))
-
-	conn.Write([]byte(httpBody))
-
-	reader := bufio.NewReader(conn)
-	reply := make([]byte, 1024)
-	reader.Read(reply)
-}
-
-
 func TestGMT(t *testing.T) {
 	timestamp := GMT()
 	if "GMT" != timestamp[len(timestamp) -3:len(timestamp)] {
@@ -71,37 +26,32 @@ func TestGMT(t *testing.T) {
 	}
 }
 
-func TestNewHttp(t *testing.T) {
-	go httpClient(plaintext)
-	httpServer()
-}
-
 
 func TestParseHttpRequest(t *testing.T) {
-	// empty http request
+	// Empty http request
 	msg := make([]byte, 0)
 	msg = ParseHttpRequest(msg)
 	if len(msg) == 0 {
-		log.Print("empty http request test success")
+		log.Print("Empty http request test success.")
 	} else {
-		log.Print("empty http request test failed")
+		log.Print("Empty http request test failed.")
 	}
 
 	// Incomplete http request
 	msg = ParseHttpRequest(incompleteHttpRequest)
 	if len(msg) == 0 {
-		log.Print("incomplete http request test success")
+		log.Print("Incomplete http request test success.")
 	} else {
-		log.Print("incomplete http request test failed")
+		log.Print("Incomplete http request test failed.")
 	}
 
 	// Complete http request
 	msg = NewHttpRequest([]byte(plaintext))
 	msg = ParseHttpRequest(msg)
 	if string(msg) == plaintext {
-		log.Print("complete http request test success")
+		log.Print("Complete http request test success.")
 	} else {
-		log.Print("complete http request test failed")
+		log.Print("Complete http request test failed.")
 	}
 }
 
@@ -110,25 +60,25 @@ func TestParseHttpResponse(t *testing.T) {
 	msg := make([]byte, 0)
 	msg = ParseHttpResponse(msg)
 	if len(msg) == 0 {
-		log.Print("empty http response test success")
+		log.Print("Empty http response test success.")
 	} else {
-		log.Print("empty http response test failed")
+		log.Print("Empty http response test failed.")
 	}
 
 	// Incomplete http response
 	msg = ParseHttpResponse(incompletehttpResponse)
 	if len(msg) == 0 {
-		log.Print("incomplete http response test success")
+		log.Print("Incomplete http response test success.")
 	} else {
-		log.Print("incomplete http response test failed")
+		log.Print("Incomplete http response test failed.")
 	}
 
 	// Complete http response
 	msg = NewHttpResponse([]byte(plaintext))
 	msg = ParseHttpResponse(msg)
 	if string(msg) == plaintext {
-		log.Print("complete http response test success")
+		log.Print("Complete http response test success.")
 	} else {
-		log.Print("complete http response test failed")
+		log.Print("Complete http response test failed.")
 	}
 }
