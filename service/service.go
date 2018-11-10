@@ -100,7 +100,11 @@ func (s *Service) EncodeTransfer(dst *net.TCPConn, src *net.TCPConn, cs Type) er
 	for {
 		readCount, errRead := src.Read(buf)
 		if errRead != nil {
-			return errRead
+			if errRead != io.EOF {
+				return nil
+			} else {
+				return errRead
+			}
 		}
 		if readCount > 0 {
 			_, errWrite := s.HttpEncode(dst, buf[0:readCount], cs)
@@ -124,7 +128,11 @@ func (s *Service) DecodeTransfer(dst *net.TCPConn, src *net.TCPConn, cs Type) er
 	for {
 		readCount, errRead := s.HttpDecode(src, buf, cs)
 		if errRead != nil {
-			return errRead
+			if errRead != io.EOF {
+				return nil
+			} else {
+				return errRead
+			}
 		}
 		if readCount > 0 {
 			writeCount, errWrite := dst.Write(buf[0:readCount])
