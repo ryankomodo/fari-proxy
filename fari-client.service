@@ -3,7 +3,7 @@ Description=Fari-Client
 
 [Service]
 TimeoutStartSec=0
-ExecStart=~/proxy/fari-client -c ~/proxy/.client.json
+ExecStart=/root/proxy/fari-client -c /root/proxy/.client.json
 
 [Install]
 WantedBy=multi-user.target
