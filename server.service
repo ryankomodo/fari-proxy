@@ -1,0 +1,9 @@
+[Unit]
+Description=Fari-Server
+
+[Service]
+TimeoutStartSec=0
+ExecStart=~/proxy/fari-server -c .server.json
+
+[Install]
+WantedBy=multi-user.target
