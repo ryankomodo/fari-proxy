@@ -25,6 +25,8 @@ archive:
   files:
     - .client.json
     - .server.json
+    - fari-client.service
+    - fari-server.service
     - supervisord.conf
     - whiteiplist.pac
     - start.sh
