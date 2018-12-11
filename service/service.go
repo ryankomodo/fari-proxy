@@ -83,7 +83,7 @@ func (s *Service) HttpEncode(conn *net.TCPConn, src []byte, cs Type) (n int, err
 	}
 
 	// Padding with 0x00
-	if len(httpMsg) <  buf_len{
+	if len(httpMsg) <  buf_len {
 		padding := make([]byte, buf_len-len(httpMsg))
 		for i := range padding {
 			padding[i] = 0x00
