@@ -52,8 +52,9 @@ func (s *server) handle(userConn *net.TCPConn) {
 	*/
 
 	// Establishing socks5 connection
+
 	// Step1: receive client request [version, nmethods, methods]
-	buf := make([]byte, 256)
+	buf := make([]byte, service.REQUESTBUFFSIZE)
 	_, err := s.HttpDecode(userConn, buf, service.SERVER)
 	if err != nil || (buf[0] != 0x05) {
 		return
