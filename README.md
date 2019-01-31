@@ -4,7 +4,7 @@
 [![Go Report Card](https://goreportcard.com/badge/github.com/leviathan1995/fari-proxy)](https://goreportcard.com/report/github.com/leviathan1995/fari-proxy)
 [![GitHub version](https://badge.fury.io/gh/leviathan1995%2Ffari-proxy.svg)](https://badge.fury.io/gh/leviathan1995%2Ffari-proxy)
 
-一个自由上网的代理工具, 将传输的数据加密包裹在HTTP报文, 伪装成简单的明文HTTP流量，模拟HTTP请求与响应的过程，规避其他代理因为加密特征可能被嗅探的风险, 搭配`pac`使用体验更佳.
+一个简易的网络工具, 将传输的数据加密包裹在HTTP报文, 伪装成简单的明文HTTP流量，模拟HTTP请求与响应的过程.
 
 ## 特点:
 
@@ -71,9 +71,6 @@ git config --global https.proxy 'socks5://127.0.0.1:20010'
 
 ## Tips
 如有任何使用问题，请在Github提交issue.
-
-## VPS推荐
-强力推荐[搬瓦工$29.9年付洛杉矶节点](https://bandwagonhost.com/aff.php?aff=35559)
 
 ## TODO
 
