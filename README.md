@@ -72,6 +72,9 @@ git config --global https.proxy 'socks5://127.0.0.1:20010'
 ## Tips
 如有任何使用问题，请在Github提交issue.
 
+## VPS推荐
+强力推荐[搬瓦工$29.9年付洛杉矶节点](https://bandwagonhost.com/aff.php?aff=35559)
+
 ## TODO
 
 * 优化代码
