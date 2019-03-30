@@ -37,10 +37,10 @@
 		}
 
 * ### Linux使用Systemctl
-```
-sh start.sh client 启动客户端
-sh start.sh server 启动服务器
-```
+	```
+	sh start.sh client 启动客户端
+	sh start.sh server 启动服务器
+	```
 
 * ### OS X使用Supervisor
   #### 启动后台管理工具Supervisor
