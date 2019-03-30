@@ -91,13 +91,13 @@ func (s *server) handle(userConn *net.TCPConn) {
 	// Step4: connect to the destination server and send a reply to client
 	dstServer, err := net.DialTCP("tcp", nil, dstAddr)
 	if err != nil {
+		log.Printf("Connect to destination addr %s failed", dstAddr.String())
 		return
 	} else {
 		defer dstServer.Close()
 		dstServer.SetLinger(0)
 		_, errWrite := s.HttpEncode(userConn, []byte{0x05, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00}, service.SERVER)
 		if errWrite != nil {
-			log.Printf("Testing")
 			return
 		}
 	}

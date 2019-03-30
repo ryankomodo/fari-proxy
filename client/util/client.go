@@ -40,11 +40,13 @@ func NewClient(remote, listen, password string) *client {
 }
 
 func (c *client) Listen() error {
+	log.Printf("Server监听地址: %s:%d", c.RemoteAddr.IP, c.RemoteAddr.Port)
 	listener, err := net.ListenTCP("tcp", c.ListenAddr)
 	if err != nil {
 		return err
 	}
-	log.Printf("Client启动成功,监听在 %s:%d, 密码: %s", c.ListenAddr.IP, c.ListenAddr.Port, c.Cipher.Password)
+	log.Printf("Client启动成功, 监听地址: %s:%d, 密码: %s", c.ListenAddr.IP, c.ListenAddr.Port, c.Cipher.Password)
+
 
 	defer listener.Close()
 
@@ -95,15 +97,22 @@ func (c *client) newProxyConn() (*net.TCPConn, error) {
 }
 
 func (c *client) directDial(userConn *net.TCPConn, dstAddr *net.TCPAddr) (*net.TCPConn, error){
-	dstServer, err := net.DialTCP("tcp", nil, dstAddr)
+	conn, errDial := net.DialTimeout("tcp", dstAddr.String(), time.Millisecond * 30)
 
-	if err != nil {
-		return &net.TCPConn{}, err
+	//defer conn.Close()
+	if errDial != nil {
+		return &net.TCPConn{}, errDial
 	} else {
-		dstServer.SetLinger(0)
-		err = c.CustomWrite(userConn, []byte{0x05, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00}, 10)
+		defer conn.Close()
+		dstConn, errDialTCP := net.DialTCP("tcp", nil, dstAddr)
+		if errDialTCP != nil {
+			return &net.TCPConn{}, errDial
+		} else {
+			dstConn.SetLinger(0)
+			errDialTCP = c.CustomWrite(userConn, []byte{0x05, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00}, 10)
+		}
+		return dstConn, errDialTCP
 	}
-	return dstServer, err
 }
 
 func (c *client) directConnect(userConn *net.TCPConn, dstConn *net.TCPConn) {
@@ -185,8 +194,8 @@ func (c *client) handleConn(userConn *net.TCPConn) {
 	} else {
 		dstConn, errDirect := c.directDial(userConn, dstAddr)
 		if errDirect != nil {
-			log.Printf("Can't directly connect to %s, try to use Porxy", dstAddr.String())
-			go
+			log.Printf("Can't directly connect to %s, Try to use Proxy and Put it into the block list", dstAddr.String())
+			go c.addBlockList(dstAddr.String())
 			c.tryPorxy(userConn, lastUserRequest)
 		} else {
 			log.Printf("Directly connect to %s", dstAddr.String())
