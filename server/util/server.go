@@ -51,19 +51,13 @@ func (s *server) handle(userConn *net.TCPConn) {
 		https://www.ietf.org/rfc/rfc1928.txt
 	*/
 
-	// Establishing socks5 connection
+	/*	We already remove SOCKS5 parsing to the client, but if the client can't directly
+		connect to the destination, the client must send the user the last request to the
+		proxy knows what address to connect.
+	 */
 
-	// Step1: receive client request [version, nmethods, methods]
+	// Get the connect command and the destination address
 	buf := make([]byte, service.REQUESTBUFFSIZE)
-	_, err := s.HttpDecode(userConn, buf, service.SERVER)
-	if err != nil || (buf[0] != 0x05) {
-		return
-	}
-
-	// Step2: send to client 0x05,0x00 [version, method]
-	s.HttpEncode(userConn, []byte{0x05, 0x00}, service.SERVER)
-
-	// Step3: get the command and destination server address
 	n, err := s.HttpDecode(userConn, buf, service.SERVER)
 	if err != nil {
 		return
@@ -101,7 +95,11 @@ func (s *server) handle(userConn *net.TCPConn) {
 	} else {
 		defer dstServer.Close()
 		dstServer.SetLinger(0)
-		s.HttpEncode(userConn, []byte{0x05, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00}, service.SERVER)
+		_, errWrite := s.HttpEncode(userConn, []byte{0x05, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00}, service.SERVER)
+		if errWrite != nil {
+			log.Printf("Testing")
+			return
+		}
 	}
 
 	log.Printf("Connect to destination addr %s", dstAddr.String())

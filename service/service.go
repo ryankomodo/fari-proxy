@@ -2,6 +2,7 @@ package service
 
 import (
 	"crypto/aes"
+	"encoding/binary"
 	"errors"
 	"fmt"
 	"io"
@@ -147,10 +148,102 @@ func (s *Service) DecodeTransfer(dst *net.TCPConn, src *net.TCPConn, cs Type) er
 }
 
 
+func (s *Service) Transfer(srcConn *net.TCPConn, dstConn *net.TCPConn) error {
+	buf := make([]byte, BUFFSIZE * 2)
+	for {
+		readCount, errRead := srcConn.Read(buf)
+		if errRead != nil {
+			if errRead != io.EOF {
+				return nil
+			} else {
+				return errRead
+			}
+		}
+		if readCount > 0 {
+			_, errWrite := dstConn.Write(buf[0:readCount])
+			if errWrite != nil {
+				return errWrite
+			}
+		}
+	}
+}
+
 func (s *Service) DialRemote() (*net.TCPConn, error) {
 	remoteConn, err := net.DialTCP("tcp", nil, s.RemoteAddr)
 	if err != nil {
 		return nil, errors.New(fmt.Sprintf("连接到远程服务器 %s 失败:%s", s.RemoteAddr, err))
 	}
 	return remoteConn, nil
+}
+
+
+func (s *Service) CustomRead(userConn *net.TCPConn, buf [] byte) (int, error) {
+	readCount, errRead := userConn.Read(buf)
+	if errRead != nil {
+		if errRead != io.EOF {
+			return readCount, nil
+		} else {
+			return readCount, errRead
+		}
+	}
+	return readCount, nil
+}
+
+func (s *Service) CustomWrite(userConn *net.TCPConn, buf [] byte, bufLen int) error {
+	writeCount, errWrite := userConn.Write(buf)
+	if errWrite != nil {
+		return errWrite
+	}
+	if bufLen != writeCount {
+		return io.ErrShortWrite
+	}
+	return nil
+}
+
+func (s *Service) ParseSOCKS5(userConn *net.TCPConn) (*net.TCPAddr, []byte, error){
+	buf := make([]byte, BUFFSIZE)
+
+	readCount, errRead := s.CustomRead(userConn, buf)
+	if readCount > 0 && errRead == nil {
+		if (buf[0] != 0x05) {
+			return &net.TCPAddr{}, nil, errors.New("Only Support SOCKS5")
+		} else {
+			// Send to client 0x05,0x00 [version, method]
+			errWrite := s.CustomWrite(userConn, []byte{0x05, 0x00}, 2)
+			if errWrite != nil {
+				return &net.TCPAddr{}, nil, errors.New("Send Failed")
+			}
+		}
+	}
+
+	readCount, errRead = s.CustomRead(userConn, buf)
+	if readCount > 0 && errRead == nil {
+		if buf[1] != 0x01 { // Only support connect
+			return &net.TCPAddr{}, nil, errors.New("Only Support Connect")
+		}
+
+		// Parsing destination addr and port
+		var desIP []byte
+		switch buf[3] {
+		case 0x01:
+			desIP = buf[4 : 4+net.IPv4len]
+		case 0x03:
+			ipAddr, err := net.ResolveIPAddr("ip", string(buf[5:readCount-2]))
+			if err != nil {
+				return &net.TCPAddr{}, nil, errors.New("Parse IP Failed")
+			}
+			desIP = ipAddr.IP
+		case 0x04:
+			desIP = buf[4 : 4+net.IPv6len]
+		default:
+			return &net.TCPAddr{}, nil, errors.New("Not Support Address")
+		}
+		dstPort := buf[readCount-2 : readCount]
+		dstAddr := &net.TCPAddr{
+			IP:   desIP,
+			Port: int(binary.BigEndian.Uint16(dstPort)),
+		}
+		return dstAddr, buf[:readCount], errRead
+	}
+	return &net.TCPAddr{}, nil, errRead
 }
