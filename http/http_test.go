@@ -11,7 +11,7 @@ var incompleteHttpRequest = []byte("GET /blog.html HTTP/1.1\r\n" +
 	"Accept-Language:zh-cn\r\n" +
 	"Connection:Keep-Alive\r\n")
 
-var incompletehttpResponse = []byte("HTTP/1.1 200 OK\r\n" +
+var incompleteHttpResponse = []byte("HTTP/1.1 200 OK\r\n" +
 	"Content-Type: text/html\r\n" +
 	"Date: " +  GMT() + "\r\n" +
 	"Server: Microsoft-IIS/6.0\r\n" +
@@ -66,7 +66,7 @@ func TestParseHttpResponse(t *testing.T) {
 	}
 
 	// Incomplete http response
-	msg = ParseHttpResponse(incompletehttpResponse)
+	msg = ParseHttpResponse(incompleteHttpResponse)
 	if len(msg) == 0 {
 		log.Print("Incomplete http response test success.")
 	} else {

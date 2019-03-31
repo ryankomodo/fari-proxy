@@ -32,24 +32,24 @@ type Service struct {
 
 
 func (s *Service) HttpDecode(conn *net.TCPConn, src []byte, cs Type) (n int, err error) {
-	var length, buf_len int
+	var length, bufLen int
 	if cs == SERVER {
-		buf_len = REQUESTBUFFSIZE
+		bufLen = REQUESTBUFFSIZE
 	} else {
-		buf_len = RESPONSEBUFFSIZE
+		bufLen = RESPONSEBUFFSIZE
 	}
 
-	source := make([]byte, buf_len)
-	nread, err := conn.Read(source)
-	if nread == 0 || err != nil {
+	source := make([]byte, bufLen)
+	nRead, err := conn.Read(source)
+	if nRead == 0 || err != nil {
 		return
 	}
-	for nread != buf_len {
-		length, err = conn.Read(source[nread:])
+	for nRead != bufLen {
+		length, err = conn.Read(source[nRead:])
 		if err != nil {
 			return
 		}
-		nread += length
+		nRead += length
 	}
 
 	var encrypted []byte
@@ -74,18 +74,18 @@ func (s *Service) HttpEncode(conn *net.TCPConn, src []byte, cs Type) (n int, err
 	(*s.Cipher).AesEncrypt(encrypted, src, iv)
 
 	var httpMsg []byte
-	var buf_len int
+	var bufLen int
 	if cs == SERVER {
 		httpMsg = http.NewHttpResponse(encrypted)
-		buf_len = RESPONSEBUFFSIZE
+		bufLen = RESPONSEBUFFSIZE
 	} else {
 		httpMsg = http.NewHttpRequest(encrypted)
-		buf_len = REQUESTBUFFSIZE
+		bufLen = REQUESTBUFFSIZE
 	}
 
 	// Padding with 0x00
-	if len(httpMsg) <  buf_len {
-		padding := make([]byte, buf_len-len(httpMsg))
+	if len(httpMsg) <  bufLen {
+		padding := make([]byte, bufLen-len(httpMsg))
 		for i := range padding {
 			padding[i] = 0x00
 		}
@@ -118,13 +118,13 @@ func (s *Service) EncodeTransfer(dst *net.TCPConn, src *net.TCPConn, cs Type) er
 
 
 func (s *Service) DecodeTransfer(dst *net.TCPConn, src *net.TCPConn, cs Type) error {
-	var buf_len int
+	var bufLen int
 	if cs == SERVER {
-		buf_len = REQUESTBUFFSIZE
+		bufLen = REQUESTBUFFSIZE
 	} else {
-		buf_len = RESPONSEBUFFSIZE
+		bufLen = RESPONSEBUFFSIZE
 	}
-	buf := make([]byte, buf_len)
+	buf := make([]byte, bufLen)
 
 	for {
 		readCount, errRead := s.HttpDecode(src, buf, cs)
@@ -205,7 +205,7 @@ func (s *Service) ParseSOCKS5(userConn *net.TCPConn) (*net.TCPAddr, []byte, erro
 
 	readCount, errRead := s.CustomRead(userConn, buf)
 	if readCount > 0 && errRead == nil {
-		if (buf[0] != 0x05) {
+		if buf[0] != 0x05 {
 			return &net.TCPAddr{}, nil, errors.New("Only Support SOCKS5")
 		} else {
 			// Send to client 0x05,0x00 [version, method]

@@ -17,8 +17,8 @@ var httpRequest = []byte("GET /blog.html HTTP/1.1\r\n" +
 	"Content-Length:")
 
 func GMT() string {
-	utc_time := time.Now().UTC().Format(time.RFC1123)
-	return strings.Replace(utc_time, "UTC", "GMT", -1)
+	utcTime := time.Now().UTC().Format(time.RFC1123)
+	return strings.Replace(utcTime, "UTC", "GMT", -1)
 }
 
 

@@ -23,6 +23,6 @@ func main() {
 	if err := json.Unmarshal(bytes, &config); err != nil {
 		log.Fatalf("Parsing %s failed.", conf)
 	}
-	client := client.NewClient(config["remote_addr"], config["listen_addr"], config["password"])
-	client.Listen()
+	clientImpl := client.NewClient(config["remote_addr"], config["listen_addr"], config["password"])
+	clientImpl.Listen()
 }

@@ -10,7 +10,7 @@ import (
 	"github.com/fari-proxy/service"
 )
 
-const maxBlock = 2000
+const maxBlock = 5000
 
 type block struct {
 	item map[string]int
@@ -56,7 +56,7 @@ func (c *client) Listen() error {
 			log.Println(err)
 			continue
 		}
-		// Discard any unsent or unacknowledged data.
+		/* Discard any unsent or unacknowledged data. */
 		userConn.SetLinger(0)
 		go c.handleConn(userConn)
 	}
@@ -68,7 +68,7 @@ var proxyPool = make(chan *net.TCPConn, 10)
 func init() {
 	go func() {
 		for range time.Tick(5 * time.Second) {
-			p := <-proxyPool	// Discard the idle connection
+			p := <-proxyPool	/* Discard the idle connection */
 			p.Close()
 		}
 	}()
@@ -97,9 +97,8 @@ func (c *client) newProxyConn() (*net.TCPConn, error) {
 }
 
 func (c *client) directDial(userConn *net.TCPConn, dstAddr *net.TCPAddr) (*net.TCPConn, error){
-	conn, errDial := net.DialTimeout("tcp", dstAddr.String(), time.Millisecond * 30)
+	conn, errDial := net.DialTimeout("tcp", dstAddr.String(), time.Millisecond * 300)
 
-	//defer conn.Close()
 	if errDial != nil {
 		return &net.TCPConn{}, errDial
 	} else {
@@ -142,15 +141,15 @@ func (c *client) addBlockList(ip string) {
 	defer c.block.mu.Unlock()
 
 	if len(c.block.item) > maxBlock {
-		for ip, _ := range c.block.item {
+		for ip := range c.block.item {
 			delete(c.block.item, ip)
-			break;
+			break
 		}
 	}
 	c.block.item[ip] = 1
 }
 
-func (c *client) tryPorxy(userConn *net.TCPConn, lastUserRequest []byte) {
+func (c *client) tryProxy(userConn *net.TCPConn, lastUserRequest []byte) {
 	proxy, err := c.newProxyConn()
 	if err != nil {
 		log.Println(err)
@@ -188,15 +187,15 @@ func (c *client) handleConn(userConn *net.TCPConn) {
 	}
 
 	block := c.searchBlockList(dstAddr.IP.String())
-	if (block) {
-		log.Printf("Can't directly connect to %s, try to use Porxy", dstAddr.String())
-		c.tryPorxy(userConn, lastUserRequest)
+	if block {
+		log.Printf("Can't directly connect to %s, Try to use Porxy", dstAddr.String())
+		c.tryProxy(userConn, lastUserRequest)
 	} else {
 		dstConn, errDirect := c.directDial(userConn, dstAddr)
 		if errDirect != nil {
 			log.Printf("Can't directly connect to %s, Try to use Proxy and Put it into the block list", dstAddr.String())
-			go c.addBlockList(dstAddr.String())
-			c.tryPorxy(userConn, lastUserRequest)
+			go c.addBlockList(dstAddr.IP.String())
+			c.tryProxy(userConn, lastUserRequest)
 		} else {
 			log.Printf("Directly connect to %s", dstAddr.String())
 			c.directConnect(userConn, dstConn)
