@@ -38,8 +38,8 @@
 
 * ### Linux使用Systemctl
 	```
-	sh start.sh client 启动客户端
-	sh start.sh server 启动服务器
+	sh start.sh client # 启动客户端
+	sh start.sh server # 启动服务端
 	```
 
 * ### OS X使用Supervisor
