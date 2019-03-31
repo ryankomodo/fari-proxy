@@ -56,7 +56,7 @@
         supervisorctl start fari-server
 		
 * ### 开启SOCKS5
-	本地开启SOCKS5代理, 例如浏览器的SOCKS5插件
+	本地开启SOCKS5代理, 例如浏览器的SOCKS5插件, Mac OS X使用Network->Advanced->Proxies->SOCKS Proxy即可
 
 ## 注意:
 
