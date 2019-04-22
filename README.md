@@ -10,7 +10,7 @@
 
 * 数据包使用`aes-cfb`对称加密
 * 使用HTTP协议伪装数据包, 后续会支持自定义HTTP报文
-* 智能路由
+* 智能路由, 支持URL类型强制代理
 * 对本地网络软件而言, 仍然是使用的SOCKS5代理, 与浏览器等软件无缝兼容, 包括`git clone`加速
 * 使用Supervisor或者Systemctl后台运行管理
 * 提供二进制可执行文件跨平台运行
@@ -26,7 +26,9 @@
 		{
             "remote_addr" : "127.0.0.1:20010",   远程服务器监听地址
             "listen_addr" : "127.0.0.1:20011",   本地SOCKS5监听地址
-            "password" : "uzon57jd0v869t7w"
+            "password"    : "uzon57jd0v869t7w",
+	    "url"         : ["www.github.com",   强制代理
+                             "www.baidu.com"]
 		}
 
   `.server.json`
