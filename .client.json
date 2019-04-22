@@ -1,5 +1,7 @@
 {
   "remote_addr" : "127.0.0.1:80",
   "listen_addr" : "127.0.0.1:20013",
-  "password" : "uzon57jd0v869t7w"
+  "password" : "uzon57jd0v869t7w",
+  "url" : ["www.github.com",
+           "www.baidu.com"]
 }

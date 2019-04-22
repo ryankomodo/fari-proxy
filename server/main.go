@@ -11,7 +11,7 @@ import (
 
 func main() {
 	var conf string
-	var config map[string]string
+	var config map[string]interface{}
 	flag.StringVar(&conf, "c", ".server.json", "server config")
 	flag.Parse()
 
@@ -23,6 +23,6 @@ func main() {
 	if err := json.Unmarshal(bytes, &config); err != nil {
 		log.Fatalf("parse %s failed.", conf)
 	}
-	s := server.NewServer(config["listen_addr"], config["password"])
+	s := server.NewServer(config["listen_addr"].(string), config["password"].(string))
 	s.Listen()
 }

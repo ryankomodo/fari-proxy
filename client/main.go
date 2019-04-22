@@ -5,13 +5,15 @@ import (
 	"flag"
 	"io/ioutil"
 	"log"
+	"net"
 
 	"github.com/fari-proxy/client/util"
 )
 
+
 func main() {
 	var conf string
-	var config map[string]string
+	var config map[string]interface{}
 	flag.StringVar(&conf, "c", ".client.json", "client config")
 	flag.Parse()
 
@@ -23,6 +25,21 @@ func main() {
 	if err := json.Unmarshal(bytes, &config); err != nil {
 		log.Fatalf("Parsing %s failed.", conf)
 	}
-	clientImpl := client.NewClient(config["remote_addr"], config["listen_addr"], config["password"])
+
+	var forceIP, forceURL []string
+	url, _ := config["url"].([]interface{})
+
+	for _, url := range url {
+		forceURL = append(forceURL, url.(string))
+	}
+
+	for _, url := range forceURL {
+		ipAddr, _ := net.LookupIP(url)
+		for _, ip := range ipAddr {
+			forceIP = append(forceIP, ip.String())
+		}
+	}
+
+	clientImpl := client.NewClient(config["remote_addr"].(string), config["listen_addr"].(string), config["password"].(string), forceIP)
 	clientImpl.Listen()
 }

@@ -20,9 +20,10 @@ type block struct {
 type client struct {
 	*service.Service
 	*block
+	forceProxy []string
 }
 
-func NewClient(remote, listen, password string) *client {
+func NewClient(remote, listen, password string, urls []string) *client {
 	c := encryption.NewCipher([]byte(password))
 	listenAddr, _ := net.ResolveTCPAddr("tcp", listen)
 	remoteAddr, _ := net.ResolveTCPAddr("tcp", remote)
@@ -36,6 +37,7 @@ func NewClient(remote, listen, password string) *client {
 			mu:		&sync.RWMutex{},
 			item: 	make(map[string]int),
 			},
+			urls,
 	}
 }
 
@@ -60,7 +62,6 @@ func (c *client) Listen() error {
 		userConn.SetLinger(0)
 		go c.handleConn(userConn)
 	}
-	return nil
 }
 
 var proxyPool = make(chan *net.TCPConn, 10)
@@ -191,6 +192,14 @@ func (c *client) handleConn(userConn *net.TCPConn) {
 		log.Printf("Can't directly connect to %s, Try to use Porxy", dstAddr.String())
 		c.tryProxy(userConn, lastUserRequest)
 	} else {
+		for _, ip := range c.forceProxy {
+			if ip == dstAddr.IP.String() {
+				go c.addBlockList(dstAddr.IP.String())
+				c.tryProxy(userConn, lastUserRequest)
+				return
+			}
+		}
+
 		dstConn, errDirect := c.directDial(userConn, dstAddr)
 		if errDirect != nil {
 			log.Printf("Can't directly connect to %s, Try to use Proxy and Put it into the block list", dstAddr.String())
