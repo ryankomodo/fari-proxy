@@ -23,15 +23,21 @@ type client struct {
 	forceProxy []string
 }
 
-func NewClient(remote, listen, password string, urls []string) *client {
+func NewClient(remote []string, listen, password string, urls []string) *client {
 	c := encryption.NewCipher([]byte(password))
 	listenAddr, _ := net.ResolveTCPAddr("tcp", listen)
-	remoteAddr, _ := net.ResolveTCPAddr("tcp", remote)
+
+	var proxyAddrs []*net.TCPAddr
+	for _, proxy := range remote {
+		addr, _ := net.ResolveTCPAddr("tcp", proxy)
+		proxyAddrs = append(proxyAddrs, addr)
+	}
 	return &client{
 		&service.Service{
 			Cipher:     c,
 			ListenAddr: listenAddr,
-			RemoteAddr: remoteAddr,
+			RemoteAddrs: proxyAddrs,
+			StablePorxy: proxyAddrs[0],
 		},
 		&block{
 			mu:		&sync.RWMutex{},
@@ -42,7 +48,11 @@ func NewClient(remote, listen, password string, urls []string) *client {
 }
 
 func (c *client) Listen() error {
-	log.Printf("Server监听地址: %s:%d", c.RemoteAddr.IP, c.RemoteAddr.Port)
+	for _, proxy := range c.RemoteAddrs {
+		log.Printf("Server监听地址: %s:%d", proxy.IP, proxy.Port)
+	}
+	log.Printf("默认Server监听地址: %s:%d", c.Service.StablePorxy.IP, c.Service.StablePorxy.Port)
+
 	listener, err := net.ListenTCP("tcp", c.ListenAddr)
 	if err != nil {
 		return err

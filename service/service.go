@@ -6,7 +6,9 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"log"
 	"net"
+	"time"
 
 	"github.com/fari-proxy/encryption"
 	"github.com/fari-proxy/http"
@@ -26,7 +28,8 @@ const (
 
 type Service struct {
 	ListenAddr *net.TCPAddr
-	RemoteAddr *net.TCPAddr
+	RemoteAddrs []*net.TCPAddr
+	StablePorxy *net.TCPAddr
 	Cipher     *encryption.Cipher
 }
 
@@ -169,11 +172,27 @@ func (s *Service) Transfer(srcConn *net.TCPConn, dstConn *net.TCPConn) error {
 }
 
 func (s *Service) DialRemote() (*net.TCPConn, error) {
-	remoteConn, err := net.DialTCP("tcp", nil, s.RemoteAddr)
+	d := net.Dialer{Timeout: 5 * time.Second}
+	remoteConn, err := d.Dial("tcp", s.StablePorxy.String())
 	if err != nil {
-		return nil, errors.New(fmt.Sprintf("连接到远程服务器 %s 失败:%s", s.RemoteAddr, err))
+		log.Printf("连接到远程服务器 %s 失败:%s", s.StablePorxy.String(), err)
+
+		// Try other proxies
+		for _, proxy := range s.RemoteAddrs {
+			log.Printf("尝试其他远程服务器: %s", proxy.String())
+			remoteConn, err := d.Dial("tcp", proxy.String())
+			if err == nil {
+				s.StablePorxy = proxy
+				tcpConn, _ := remoteConn.(*net.TCPConn)
+				return tcpConn, nil
+
+			}
+		}
+		return nil, errors.New(fmt.Sprintf("所有远程服务器连接均失败"))
 	}
-	return remoteConn, nil
+	log.Printf("连接到远程服务器 %s 成功", s.StablePorxy.String())
+	tcpConn, _ := remoteConn.(*net.TCPConn)
+	return tcpConn, nil
 }
 
 

@@ -40,6 +40,13 @@ func main() {
 		}
 	}
 
-	clientImpl := client.NewClient(config["remote_addr"].(string), config["listen_addr"].(string), config["password"].(string), forceIP)
+	var proxyIP []string
+	proxy, _ := config["remote_addr"].([]interface{})
+
+	for _, ip := range proxy {
+		proxyIP = append(proxyIP, ip.(string))
+	}
+
+	clientImpl := client.NewClient(proxyIP, config["listen_addr"].(string), config["password"].(string), forceIP)
 	clientImpl.Listen()
 }
