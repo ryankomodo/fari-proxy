@@ -25,7 +25,8 @@
   `.client.json`
 
 		{
-            "remote_addr" : "127.0.0.1:20010",   远程服务器监听地址
+            "remote_addr" : ["127.0.0.1:20009",
+	                         "127.0.0.1:20010"],   远程服务器监听地址
             "listen_addr" : "127.0.0.1:20011",   本地SOCKS5监听地址
             "password"    : "uzon57jd0v869t7w",
 	        "url"         : ["www.github.com",   强制代理
