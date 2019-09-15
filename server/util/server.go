@@ -52,8 +52,9 @@ func (s *server) handle(userConn *net.TCPConn) {
 	*/
 
 	/*	We already remove SOCKS5 parsing to the client, but if the client can't directly
-		connect to the destination, the client must send the user the last request to the
-		proxy knows what address to connect.
+		connect to the destination address, the client must send the user the last request to the
+		proxy knows what address to connect, and if connect the destination success, we
+	    also need to notify client.
 	 */
 
 	// Get the connect command and the destination address
@@ -67,7 +68,7 @@ func (s *server) handle(userConn *net.TCPConn) {
 		return
 	}
 
-	// Parsing destination addr and port
+	/* Parsing destination addr and port */
 	var desIP []byte
 	switch buf[3] {
 	case 0x01:
@@ -88,7 +89,7 @@ func (s *server) handle(userConn *net.TCPConn) {
 		IP:   desIP,
 		Port: int(binary.BigEndian.Uint16(dstPort)),
 	}
-	// Step4: connect to the destination server and send a reply to client
+	/* Step4: connect to the destination server and send a reply to client */
 	dstServer, err := net.DialTCP("tcp", nil, dstAddr)
 	if err != nil {
 		log.Printf("Connect to destination addr %s failed", dstAddr.String())
@@ -96,6 +97,7 @@ func (s *server) handle(userConn *net.TCPConn) {
 	} else {
 		defer dstServer.Close()
 		dstServer.SetLinger(0)
+		/* If connect to the dst addr success, we need to notify client */
 		_, errWrite := s.HttpEncode(userConn, []byte{0x05, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00}, service.SERVER)
 		if errWrite != nil {
 			return

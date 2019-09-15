@@ -119,6 +119,7 @@ func (c *client) directDial(userConn *net.TCPConn, dstAddr *net.TCPAddr) (*net.T
 			return &net.TCPConn{}, errDial
 		} else {
 			dstConn.SetLinger(0)
+			/* If connect to the dst addr success, we need to notify client. */
 			errDialTCP = c.CustomWrite(userConn, []byte{0x05, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00}, 10)
 		}
 		return dstConn, errDialTCP
@@ -192,6 +193,10 @@ func (c *client) tryProxy(userConn *net.TCPConn, lastUserRequest []byte) {
 func (c *client) handleConn(userConn *net.TCPConn) {
 	defer userConn.Close()
 
+	/*  why use lastUserRequest?
+	    if we can not direct connect to the destination address, we need to forward
+		the last data package to the server.
+	 */
 	dstAddr, lastUserRequest, errParse := c.ParseSOCKS5(userConn)
 	if errParse != nil {
 		log.Printf(errParse.Error())
