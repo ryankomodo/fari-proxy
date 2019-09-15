@@ -194,6 +194,7 @@ func (c *client) handleConn(userConn *net.TCPConn) {
 
 	dstAddr, lastUserRequest, errParse := c.ParseSOCKS5(userConn)
 	if errParse != nil {
+		log.Printf(errParse.Error())
 		return
 	}
 

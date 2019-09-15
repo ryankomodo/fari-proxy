@@ -225,43 +225,45 @@ func (s *Service) ParseSOCKS5(userConn *net.TCPConn) (*net.TCPAddr, []byte, erro
 	readCount, errRead := s.CustomRead(userConn, buf)
 	if readCount > 0 && errRead == nil {
 		if buf[0] != 0x05 {
+			/* Version Number */
 			return &net.TCPAddr{}, nil, errors.New("Only Support SOCKS5")
 		} else {
-			// Send to client 0x05,0x00 [version, method]
+			/* [SOCKS5, NO AUTHENTICATION REQUIRED]  */
 			errWrite := s.CustomWrite(userConn, []byte{0x05, 0x00}, 2)
 			if errWrite != nil {
-				return &net.TCPAddr{}, nil, errors.New("Send the version and method failed")
+				return &net.TCPAddr{}, nil, errors.New("Response SOCKS5 failed at the first stage.")
 			}
 		}
 	}
 
 	readCount, errRead = s.CustomRead(userConn, buf)
 	if readCount > 0 && errRead == nil {
-		if buf[1] != 0x01 { // Only support connect
-			return &net.TCPAddr{}, nil, errors.New("Only support connect method")
+		if buf[1] != 0x01 {
+			/* Only support CONNECT*/
+			return &net.TCPAddr{}, nil, errors.New("Only support CONNECT and UDP ASSOCIATE method.")
 		}
 
-		// Parsing destination addr and port
 		var desIP []byte
-		switch buf[3] {
-		case 0x01:
+		switch buf[3] { /* checking ATYPE */
+		case 0x01: /* IPv4 */
 			desIP = buf[4 : 4+net.IPv4len]
-		case 0x03:
+		case 0x03: /* DOMAINNAME */
 			ipAddr, err := net.ResolveIPAddr("ip", string(buf[5:readCount-2]))
 			if err != nil {
 				return &net.TCPAddr{}, nil, errors.New("Parse IP failed")
 			}
 			desIP = ipAddr.IP
-		case 0x04:
+		case 0x04: /* IPV6 */
 			desIP = buf[4 : 4+net.IPv6len]
 		default:
-			return &net.TCPAddr{}, nil, errors.New("Not support address")
+			return &net.TCPAddr{}, nil, errors.New("Wrong DST.ADDR and DST.PORT")
 		}
 		dstPort := buf[readCount-2 : readCount]
 		dstAddr := &net.TCPAddr{
 			IP:   desIP,
 			Port: int(binary.BigEndian.Uint16(dstPort)),
 		}
+
 		return dstAddr, buf[:readCount], errRead
 	}
 	return &net.TCPAddr{}, nil, errRead
