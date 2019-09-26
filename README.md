@@ -4,7 +4,7 @@
 [![Go Report Card](https://goreportcard.com/badge/github.com/leviathan1995/fari-proxy)](https://goreportcard.com/report/github.com/leviathan1995/fari-proxy)
 [![GitHub version](https://badge.fury.io/gh/leviathan1995%2Ffari-proxy.svg)](https://badge.fury.io/gh/leviathan1995%2Ffari-proxy)
 
-一个自由上网的工具, 将传输的数据加密包裹在HTTP报文, 伪装成简单的明文HTTP流量，模拟HTTP请求与响应的过程.
+`fari-proxy`将传输的数据加密包裹在HTTP报文, 伪装成简单的明文HTTP流量，模拟HTTP请求与响应的过程.
 
 ## 特点:
 

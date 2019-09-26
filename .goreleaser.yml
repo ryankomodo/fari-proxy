@@ -2,6 +2,7 @@
 # Build customization
 builds:
   - binary: fari-client
+    id: "client"
     main: ./client/main.go
     goos:
       - windows
@@ -10,6 +11,8 @@ builds:
     goarch:
       - amd64
   - binary: fari-server
+    id: "server"
+    main: ./client/main.go
     main: ./server/main.go
     goos:
       - windows
